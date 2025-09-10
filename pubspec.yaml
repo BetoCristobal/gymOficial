@@ -11,6 +11,16 @@ dependencies:
     sdk: flutter
   dropdown_button2: ^2.3.9
   font_awesome_flutter: ^10.9.1
+  sqflite: ^2.4.1
+  path_provider: ^2.1.5
+  path: ^1.9.0
+  pdf: ^3.11.3
+  permission_handler: ^12.0.1
+  provider: ^6.1.5+1
+  url_launcher: ^6.3.2
+  intl: ^0.20.2
+  image_picker: ^1.2.0
+  data_table_2: ^2.6.0
 
 dev_dependencies:
   flutter_test:
