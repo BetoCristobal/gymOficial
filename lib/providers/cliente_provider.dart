@@ -33,7 +33,15 @@ class ClienteProvider extends ChangeNotifier{
     }            
   }
 
-  Future<void> agregarCliente(String nombres, String apellidos, String telefono, String? fotoPath) async {
+  Future<void> agregarCliente(
+    String nombres, 
+    String apellidos, 
+    String telefono, 
+    String? fotoPath, 
+    String telefonoEmergencia, 
+    String nombreEmergencia, 
+    String correo, 
+    String observaciones) async {
     try {
       final nuevoCliente = ClienteModel(
       nombres: nombres, 
@@ -42,6 +50,10 @@ class ClienteProvider extends ChangeNotifier{
       estatus: "vencido",
       fotoPath: fotoPath, //Ruta de la foto del cliente
       //Estatus: corriente, vencido, urgente, proximo.
+      telefonoEmergencia: telefonoEmergencia, 
+      nombreEmergencia: nombreEmergencia,
+      correo: correo,
+      observaciones: observaciones
       );
       await clienteRepo.insertCliente(nuevoCliente);
       print("Se agrego cliente a la BD ${nuevoCliente}");
@@ -53,7 +65,17 @@ class ClienteProvider extends ChangeNotifier{
     }
   }
 
-  Future<void> actualizarCliente(int id, String nombres, String apellidos, String telefono, String estatus, String? fotoPath) async {
+  Future<void> actualizarCliente(
+    int id, 
+    String nombres, 
+    String apellidos, 
+    String telefono, 
+    String estatus, 
+    String? fotoPath, 
+    String telefonoEmergencia, 
+    String nombreEmergencia, 
+    String correo, 
+    String observaciones) async {
     try {
       final clienteActualizado = ClienteModel(
         id: id,
@@ -62,6 +84,10 @@ class ClienteProvider extends ChangeNotifier{
         telefono: telefono, 
         estatus: estatus,
         fotoPath: fotoPath, //Ruta de la foto del cliente
+        telefonoEmergencia: telefonoEmergencia, 
+        nombreEmergencia: nombreEmergencia,
+        correo: correo,
+        observaciones: observaciones
       );
       await clienteRepo.updateCliente(clienteActualizado);      
       //notifyListeners();

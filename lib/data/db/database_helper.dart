@@ -16,7 +16,7 @@ class DatabaseHelper {
 
   Future<Database> _initDatabase() async {
     try {
-      final path = join(await getDatabasesPath(), 'gym_app.db');
+      final path = join(await getDatabasesPath(), 'mygym.db');
 
       return await openDatabase(
         path,

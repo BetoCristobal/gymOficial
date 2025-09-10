@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mygym/data/models/pago_model.dart';
 import 'package:mygym/providers/cliente_provider.dart';
 import 'package:mygym/providers/pago_provider.dart';
 import 'package:mygym/views/ver_fotos.dart';
 import 'package:mygym/widgets/clientes/barra_busqueda.dart';
+import 'package:mygym/widgets/clientes/cliente_card.dart';
 import 'package:mygym/widgets/clientes/clientes_drawer.dart';
 import 'package:mygym/widgets/clientes/form_agregar_editar_cliente.dart';
+import 'package:mygym/widgets/clientes/my_toggle_buttons.dart';
 import 'package:provider/provider.dart';
 
 class ClientesScreen extends StatefulWidget {
@@ -62,7 +65,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
               isScrollControlled: true,
               context: context, 
               builder: (BuildContext context) {
-                return FormAgregarEditarCliente();
+                return FormAgregarEditarCliente(estaEditando: false,);
               }
             );
           },
@@ -135,7 +138,47 @@ class _ClientesScreenState extends State<ClientesScreen> {
                 ),
 
                 //-------------------------------------------Filtro clientes
+                Container(
+                  key: _toggleKey,
+                  padding: EdgeInsets.only(top: 10),
+                  child: MyToggleButtons()
+                ),
 
+                //-------------------------------------------Lista clientes
+                Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      margin: EdgeInsets.only(top: 10),
+                      width: double.infinity,
+                      child: Consumer2<ClienteProvider, PagoProvider>(
+                        builder: (context, clienteProvider, pagoProvider, _) {                  
+                          
+                          if(clienteProvider.clientes.isEmpty) {
+                            return const Center(child: Text("No hay clientes registrados"),);
+                          }
+                    
+                          return ListView.builder(
+                            itemCount: clienteProvider.clientesFiltrados.length,
+                            itemBuilder: (context, index) {
+                              final cliente = clienteProvider.clientesFiltrados[index];
+                      
+                              final ultimoPago = pagoProvider.pagos.firstWhere(
+                                (pago) => pago.idCliente == cliente.id,
+                                orElse: () => PagoModel(
+                                  idCliente: 100000, 
+                                  montoPago: 0, 
+                                  fechaPago: DateTime(1900), 
+                                  proximaFechaPago: DateTime(1900), 
+                                  tipoPago: "ninguno"),
+                              );          
+                          
+                              return ClienteCard(cliente: cliente, ultimoPago: ultimoPago,);
+                            }
+                          );            
+                        },
+                      ),
+                    ),
+                  )
               ],
             ),
           ],
