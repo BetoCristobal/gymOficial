@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mygym/views/clientes_screen.dart';
+import 'package:mygym/views/login_screen.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(MainApp());
 }
 
 class MainApp extends StatelessWidget {
@@ -9,12 +11,13 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      initialRoute: "/",
+      routes: {
+        "/": (context) => LoginScreen(),
+        '/clientes': (context) => ClientesScreen(),
+      },
     );
   }
 }

@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  dropdown_button2: ^2.3.9
+  font_awesome_flutter: ^10.9.1
 
 dev_dependencies:
   flutter_test:
