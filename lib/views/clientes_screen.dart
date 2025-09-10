@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mygym/views/ver_fotos.dart';
+import 'package:mygym/widgets/clientes/barra_busqueda.dart';
 import 'package:mygym/widgets/clientes/clientes_drawer.dart';
 import 'package:mygym/widgets/clientes/form_agregar_editar_cliente.dart';
 
@@ -108,6 +109,19 @@ class _ClientesScreenState extends State<ClientesScreen> {
             Column(
               children: [
                 //-------------------------------------------Barra busqueda
+                Container(
+                  padding: EdgeInsets.only(top: 10, bottom: 0, left: 20, right: 20),
+                  child: BarraBusqueda(
+                    desactivarBarraBusqueda: true,
+                    onSearchChanged: (value) {
+                      
+                    },
+                    focusNode: _searchFocusNode
+                  )
+                ),
+
+                //-------------------------------------------Filtro clientes
+                
               ],
             ),
           ],
