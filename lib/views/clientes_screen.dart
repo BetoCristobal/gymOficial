@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mygym/providers/cliente_provider.dart';
+import 'package:mygym/providers/pago_provider.dart';
 import 'package:mygym/views/ver_fotos.dart';
 import 'package:mygym/widgets/clientes/barra_busqueda.dart';
 import 'package:mygym/widgets/clientes/clientes_drawer.dart';
 import 'package:mygym/widgets/clientes/form_agregar_editar_cliente.dart';
+import 'package:provider/provider.dart';
 
 class ClientesScreen extends StatefulWidget {
   const ClientesScreen({super.key});
@@ -34,6 +37,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
         });
       }
     });
+    Provider.of<PagoProvider>(context, listen: false).cargarPagosTodosById();
   }
 
   void _unfocusTextField() {
@@ -109,19 +113,29 @@ class _ClientesScreenState extends State<ClientesScreen> {
             Column(
               children: [
                 //-------------------------------------------Barra busqueda
-                Container(
-                  padding: EdgeInsets.only(top: 10, bottom: 0, left: 20, right: 20),
-                  child: BarraBusqueda(
-                    desactivarBarraBusqueda: true,
-                    onSearchChanged: (value) {
+                Consumer<ClienteProvider>(
+                  builder: (context, clienteProvider,_) {
+                    bool desactivarBarraBusqueda = true;
                       
-                    },
-                    focusNode: _searchFocusNode
-                  )
+                      if(clienteProvider.isSelected[0] != true) {
+                        desactivarBarraBusqueda = false;
+                      }
+
+                    return Container(
+                      padding: EdgeInsets.only(top: 10, bottom: 0, left: 20, right: 20),
+                      child: BarraBusqueda(
+                        desactivarBarraBusqueda: desactivarBarraBusqueda,
+                        onSearchChanged: (value) {
+                          clienteProvider.filtrarClientesPorNombresApellidos(value);
+                        },
+                        focusNode: _searchFocusNode
+                      )
+                    );
+                  }
                 ),
 
                 //-------------------------------------------Filtro clientes
-                
+
               ],
             ),
           ],

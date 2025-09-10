@@ -19,6 +19,16 @@ class ClienteDisciplinaRepository {
     return maps.map((map) => map['id_disciplina'] as int).toList();
   }
 
+  Future<List<ClienteDisciplinaModel>> getClienteDisciplinasPorCliente(int idCliente) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'cliente_disciplinas',
+      where: 'id_cliente = ?',
+      whereArgs: [idCliente],
+    );
+    return maps.map((map) => ClienteDisciplinaModel.fromMap(map)).toList();
+  }
+
   Future<void> deleteClienteDisciplina(int id) async {
     final db = await _dbHelper.database;
     await db.delete('cliente_disciplinas', where: 'id = ?', whereArgs: [id]);
