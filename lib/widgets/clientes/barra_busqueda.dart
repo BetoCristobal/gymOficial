@@ -22,6 +22,7 @@ class _BarraBusquedaState extends State<BarraBusqueda> {
   void _clearSearchText() {
     _searchController.clear();
     widget.onSearchChanged('');
+    widget.focusNode?.unfocus(); // Opcional: cierra el teclado al limpiar
   }
 
   @override
@@ -35,6 +36,7 @@ class _BarraBusquedaState extends State<BarraBusqueda> {
     return TextField(
               focusNode: widget.focusNode,
               enabled: widget.desactivarBarraBusqueda,
+              autofocus: false,
               controller: _searchController,
               style: TextStyle(color: Colors.white70),
               decoration: InputDecoration(

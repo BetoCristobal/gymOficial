@@ -9,11 +9,13 @@ import 'package:mygym/providers/cliente_provider.dart';
 import 'package:mygym/providers/pago_provider.dart';
 import 'package:mygym/styles/text_styles.dart';
 import 'package:mygym/utils/asignar_color_estatus_informacion.dart';
+import 'package:mygym/utils/format_telefono.dart';
 import 'package:mygym/widgets/clientes/form_agregar_editar_cliente.dart';
 import 'package:mygym/widgets/clientes/popupMenu/alert_dialog_eliminar_cliente.dart';
 import 'package:mygym/widgets/clientes/popupMenu/alert_dialog_eliminar_pago.dart';
 import 'package:mygym/widgets/clientes/popupMenu/form_agregar_editar_pago.dart';
 import 'package:mygym/widgets/informacion/alert_dialog_whatsapp.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 
 class InformacionScreen extends StatefulWidget {
@@ -86,112 +88,144 @@ class _InformacionScreenState extends State<InformacionScreen> {
                       Padding(
                         padding: const EdgeInsets.only(top: 10.0),
                         child: Text(
-                            "${cliente.nombres} ${cliente.apellidos}", 
-                            style: TextStyle(
-                              fontSize: 20, 
-                              fontWeight: FontWeight.bold
-                            ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
+                          "${cliente.nombres} ${cliente.apellidos}", 
+                          style: TextStyle(
+                            fontSize: 20, 
+                            fontWeight: FontWeight.bold
                           ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                         ),
-
+                      ),
+                      
+                      //------------------------------------------------ROW DE BOTONES
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            //---------------------------------------------------------BOTON WHATSAPP
+                            IconButton(
+                              onPressed: () {
+                                alertDialogWhatsApp(context, widget.ultimoPago.proximaFechaPago, cliente.telefono);
+                              }, 
+                              icon: Icon(FontAwesomeIcons.whatsapp, color: Colors.green[900]),
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all<Color>(Colors.green[200]!),
+                                shape: WidgetStateProperty.all<CircleBorder>(CircleBorder()),
+                              ),
+                            ),
+                        
+                            //---------------------------------------------------------BOTON AGREGAR PAGO
+                            IconButton(
+                              onPressed: () {
+                                showModalBottomSheet(
+                                        isScrollControlled: true,
+                                        context: context, 
+                                        builder: (BuildContext context) {
+                                          return FormAgregarEditarPago(idCliente: cliente.id!, estaEditando: false,);
+                                        }
+                                      );
+                              }, 
+                              icon: Icon(FontAwesomeIcons.circleDollarToSlot, color: Colors.purple[900]),
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all<Color>(Colors.purple[200]!),
+                                shape: WidgetStateProperty.all<CircleBorder>(CircleBorder()),
+                              ),
+                            ),
+                        
+                            //---------------------------------------------------------BOTON EDITAR CLIENTE
+                            IconButton(
+                              onPressed: () {
+                                showModalBottomSheet(
+                                      isScrollControlled: true,
+                                      context: context, 
+                                      builder: (BuildContext context) {
+                                        return FormAgregarEditarCliente(estaEditando: true, cliente: cliente,);
+                                      }
+                                    );
+                              }, 
+                              icon: Icon(FontAwesomeIcons.userPen, color: Colors.blue[900]),
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all<Color>(Colors.blue[200]!),
+                                shape: WidgetStateProperty.all<CircleBorder>(CircleBorder()),
+                              ),
+                            ), 
+                        
+                            //---------------------------------------------------------BOTON ELIMINAR CLIENTE
+                            IconButton(
+                              onPressed: () async {
+                                        final resultado = await AlertDialogEliminarCliente(context, cliente.id!);
+                                        if(resultado == true) {
+                                          await clienteProvider.eliminarCliente(cliente.id!);
+                                          Navigator.of(context).pop();
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text("❌Cliente eliminado")),
+                                          ); 
+                                        }
+                                      },
+                              icon: Icon(FontAwesomeIcons.xmark, color: Colors.red[900]),
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all<Color>(Colors.red[200]!),
+                                shape: WidgetStateProperty.all<CircleBorder>(CircleBorder()),
+                              ),
+                            ),                          
+                          ],
+                        ),
+                      ),
+      
                       Row(
                         children: [                                  
-                          Column(
-                            children: [
-                              
-                              //--------------------------------------------------FOTO
-                              cliente.fotoPath != null && cliente.fotoPath!.isNotEmpty
-                              ? ClipRRect(
-                                borderRadius: BorderRadius.circular(50),
-                                child: Image.file(
-                                  File(cliente.fotoPath!),
-                                  width: 150,
-                                  height: 150,
-                                  fit: BoxFit.cover,
+                          cliente.fotoPath != null && cliente.fotoPath!.isNotEmpty
+                          ? GestureDetector(
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) => Dialog(
+                                  backgroundColor: Colors.black,
+                                  insetPadding: EdgeInsets.all(10),
+                                  child: PhotoView(
+                                    imageProvider: FileImage(File(cliente.fotoPath!)),
+                                    backgroundDecoration: BoxDecoration(color: Colors.black),
+                                    minScale: PhotoViewComputedScale.contained,
+                                    maxScale: PhotoViewComputedScale.covered * 2,
                                   ),
-                              )
-                              : const Icon(Icons.person, size: 150),
-                            ],
-                          ),
+                                ),
+                              );
+                            },
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(50),
+                              child: Image.file(
+                                File(cliente.fotoPath!),
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
+                                ),
+                            ),
+                          )
+                          : const Icon(Icons.person, size: 120),
                                   
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [                    
-                                //---------------------------------------------------------BOTON WHATSAPP
-                                ElevatedButton.icon(
-                                  icon: Icon(FontAwesomeIcons.whatsapp, color: Colors.green[900]),
-                                  onPressed: () {
-                                    alertDialogWhatsApp(context, widget.ultimoPago.proximaFechaPago, cliente.telefono);
-                                    //enviarWhatsapp(widget.ultimoPago.proximaFechaPago, cliente.telefono);
-                                  }, 
-                                  label: Text("WhatsApp"),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green[200],
-                                    foregroundColor: Colors.green[900],
+                              children: [                                                    
+                                Text.rich(
+                                  TextSpan(
+                                    children: [                                      
+                                      TextSpan(text: "Teléfono: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                                      TextSpan(text: "${formatTelefono(cliente.telefono)}\n"),
+                                      TextSpan(text: "Tel. emergencia: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                                      TextSpan(text: "${formatTelefono(cliente.telefonoEmergencia)}\n"),
+                                      TextSpan(text: "Contacto emergencia: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                                      TextSpan(text: "${cliente.nombreEmergencia}\n"),
+                                      TextSpan(text: "Correo: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                                      TextSpan(text: "${cliente.correo}\n"),
+                                      TextSpan(text: "Observaciones: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                                      TextSpan(text: "${cliente.observaciones}"),
+                                    ],
                                   ),
-                                ),
-                      
-                                //---------------------------------------------------------BOTON AGREGAR PAGO
-                                ElevatedButton.icon(
-                                  icon: Icon(FontAwesomeIcons.circleDollarToSlot, color: Colors.purple[900]),
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                      isScrollControlled: true,
-                                      context: context, 
-                                      builder: (BuildContext context) {
-                                        return FormAgregarEditarPago(idCliente: cliente.id!, estaEditando: false,);
-                                      }
-                                    );
-                                  }, 
-                                  label: Text("Agregar pago"),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.purple[200],
-                                    foregroundColor: Colors.purple[900],
-                                  ),
-                                ),
-                      
-                                //---------------------------------------------------------BOTON EDITAR CLIENTE
-                                ElevatedButton.icon(
-                                  icon: Icon(FontAwesomeIcons.userPen, color: Colors.blue[900]),
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                    isScrollControlled: true,
-                                    context: context, 
-                                    builder: (BuildContext context) {
-                                      return FormAgregarEditarCliente(estaEditando: true, cliente: cliente,);
-                                    }
-                                  );
-                                  }, 
-                                  label: Text("Editar cliente"),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue[200],
-                                    foregroundColor: Colors.blue[900],
-                                  ),
-                                ),
-                      
-                                //---------------------------------------------------------BOTON ELIMINAR CLIENTE
-                                ElevatedButton.icon(
-                                  icon: Icon(FontAwesomeIcons.xmark, color: Colors.red[900]),
-                                  onPressed: () async {
-                                      final resultado = await AlertDialogEliminarCliente(context, cliente.id!);
-                                      if(resultado == true) {
-                                        await clienteProvider.eliminarCliente(cliente.id!);
-                                        Navigator.of(context).pop();
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text("❌Cliente eliminado")),
-                                        ); 
-                                      }
-                                    }, 
-                                  label: Text("Eliminar cliente"),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red[200],
-                                    foregroundColor: Colors.red[900],
-                                  ),
-                                ),
+                                )
                               ],
                             ),
                           )
@@ -204,7 +238,8 @@ class _InformacionScreenState extends State<InformacionScreen> {
               },            
             ),
           ),
-          //---------------------------------------------------------TEXTO INFORMACION ADICIONAL
+      
+          //---------------------------------------------------------SECCION PAGOS
           Padding(
             padding: const EdgeInsets.only(top: 15.0),
             child: Text("Pagos", style: TextStyles.tituloShowModal,),
@@ -216,7 +251,7 @@ class _InformacionScreenState extends State<InformacionScreen> {
                 if(pagoProvider.pagosPorCliente.isEmpty) {
                   Center(child: Text("No hay pagos registrados"),);
                 }
-
+            
                 return DataTable2(
                 columnSpacing: 10,
                 horizontalMargin: 10,
@@ -232,9 +267,9 @@ class _InformacionScreenState extends State<InformacionScreen> {
                 rows: pagoProvider.pagosPorCliente.asMap().entries.map((entry) {
                   final index = entry.key;
                   final reporte = entry.value;
-
+            
                   final pago = pagoProvider.pagosPorCliente[index];
-
+            
                   return DataRow(
                     color: MaterialStateProperty.resolveWith<Color?>(
                       (Set<MaterialState> states) {
@@ -274,7 +309,7 @@ class _InformacionScreenState extends State<InformacionScreen> {
                 }).toList()
               );
               }              
-            )
+            ),
           )
         ],
       ),

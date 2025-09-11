@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mygym/views/reportes_screen.dart';
 
 class ClientesDrawer extends StatelessWidget {
   const ClientesDrawer({super.key});
@@ -19,7 +20,7 @@ class ClientesDrawer extends StatelessWidget {
                     leading: FaIcon(FontAwesomeIcons.chartSimple, color: Colors.black),
                     title: Text('Reportes'),
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ReportesScreen()));
                       // Acción para reporte
                     },
                   ),

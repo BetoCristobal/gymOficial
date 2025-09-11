@@ -54,7 +54,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
 
     return GestureDetector(
       onTap: () {
-        FocusScope.of(context).unfocus();
+        _unfocusTextField();
       },
       behavior: HitTestBehavior.opaque,
       child: Scaffold(
