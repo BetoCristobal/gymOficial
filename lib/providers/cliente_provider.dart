@@ -33,7 +33,7 @@ class ClienteProvider extends ChangeNotifier{
     }            
   }
 
-  Future<void> agregarCliente(
+  Future<int?> agregarCliente(
     String nombres, 
     String apellidos, 
     String telefono, 
@@ -55,10 +55,10 @@ class ClienteProvider extends ChangeNotifier{
       correo: correo,
       observaciones: observaciones
       );
-      await clienteRepo.insertCliente(nuevoCliente);
+      final id = await clienteRepo.insertCliente(nuevoCliente);
       print("Se agrego cliente a la BD ${nuevoCliente}");
-      //notifyListeners();
       await cargarClientes();
+      return id;
 
     }catch(e) {
       print("❌ Error al agregar cliente: $e");

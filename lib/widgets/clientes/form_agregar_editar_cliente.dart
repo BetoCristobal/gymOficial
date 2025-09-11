@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mygym/data/models/cliente_disciplina_model.dart';
 import 'package:mygym/data/models/cliente_model.dart';
+import 'package:mygym/providers/cliente_disciplina_provider.dart';
+import 'package:mygym/providers/disciplina_provider.dart';
 import 'package:mygym/styles/text_styles.dart';
 import 'package:mygym/widgets/clientes/funciones_foto.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +23,8 @@ class FormAgregarEditarCliente extends StatefulWidget {
 }
 
 class _FormAgregarEditarClienteState extends State<FormAgregarEditarCliente> {
+
+  List<int> disciplinasSeleccionadas = [];
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -59,10 +64,33 @@ class _FormAgregarEditarClienteState extends State<FormAgregarEditarCliente> {
     observacionesController = TextEditingController(
       text: widget.estaEditando == true ? widget.cliente?.observaciones : ""
     );
+
+    // Cargar disciplinas si no están cargadas
+    final disciplinaProvider = Provider.of<DisciplinaProvider>(context, listen: false);
+    if (disciplinaProvider.disciplinas.isEmpty) {
+      disciplinaProvider.cargarDisciplinas();
+    }
+
+    // Cargar disciplinas seleccionadas si está editando
+    if (widget.estaEditando == true && widget.cliente?.id != null) {
+      Future.microtask(() async {
+        final clienteDisciplinaProvider = Provider.of<ClienteDisciplinaProvider>(context, listen: false);
+        await clienteDisciplinaProvider.cargarPorCliente(widget.cliente!.id!);
+        setState(() {
+          disciplinasSeleccionadas = clienteDisciplinaProvider.clienteDisciplinas
+              .where((cd) => cd.idCliente == widget.cliente!.id)
+              .map((cd) => cd.idDisciplina)
+              .toList();
+        });
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+
+    final disciplinas = Provider.of<DisciplinaProvider>(context).disciplinas;
+
     return IntrinsicHeight(
       child: Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -285,7 +313,31 @@ class _FormAgregarEditarClienteState extends State<FormAgregarEditarCliente> {
                       validator: (value) => 
                         value == null || value.isEmpty ? "Ingrese observaciones a considerar" : null,
                     ),
-                  ),                
+                  ),
+
+                  //-------------------------------------------SELECT DISCIPLINAS
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Disciplinas", style: TextStyle(fontWeight: FontWeight.bold)),
+                        ...disciplinas.map((disciplina) => CheckboxListTile(
+                          title: Text(disciplina.nombre),
+                          value: disciplinasSeleccionadas.contains(disciplina.id),
+                          onChanged: (selected) {
+                            setState(() {
+                              if (selected == true) {
+                                disciplinasSeleccionadas.add(disciplina.id!);
+                              } else {
+                                disciplinasSeleccionadas.remove(disciplina.id);
+                              }
+                            });
+                          },
+                        )),
+                      ],
+                    ),
+                  ),            
               
                   // BOTON GUARDAR
                   Row(
@@ -310,7 +362,6 @@ class _FormAgregarEditarClienteState extends State<FormAgregarEditarCliente> {
                       Expanded(
                         child: Container(
                           margin: EdgeInsets.only(top: 10, bottom: 20),
-                          //width: double.infinity,
                           child: ElevatedButton.icon(
                             icon: Icon(FontAwesomeIcons.floppyDisk, color: Colors.white,),
                             label: Text(widget.estaEditando == false ? "Guardar cliente" : "Actualizar cliente", style: TextStyle(color: Colors.white),),
@@ -328,7 +379,7 @@ class _FormAgregarEditarClienteState extends State<FormAgregarEditarCliente> {
                                 
                                 // SI NO ESTA EDITANDO, OSEA SI SE ESTA AGREGANDO NUEVO CLIENTE
                                 if(widget.estaEditando == false) {
-                                  await clienteProvider.agregarCliente(
+                                  final nuevoClienteId = await clienteProvider.agregarCliente(
                                     nombresController.text, 
                                     apellidosController.text, 
                                     telefonoController.text,
@@ -338,6 +389,15 @@ class _FormAgregarEditarClienteState extends State<FormAgregarEditarCliente> {
                                     correoController.text,
                                     observacionesController.text                            
                                   );
+
+                                  // Guarda las disciplinas seleccionadas
+                                  for (final idDisciplina in disciplinasSeleccionadas) {
+                                    await Provider.of<ClienteDisciplinaProvider>(context, listen: false)
+                                        .agregarClienteDisciplina(ClienteDisciplinaModel(
+                                          idCliente: nuevoClienteId!, // el id del cliente recién creado
+                                          idDisciplina: idDisciplina,
+                                        ));
+                                  }
                                     
                                   Navigator.pop(context);
                                 } else if(widget.estaEditando == true) {
@@ -372,8 +432,23 @@ class _FormAgregarEditarClienteState extends State<FormAgregarEditarCliente> {
                                     correoController.text,
                                     observacionesController.text
                                   );
-                                  Navigator.pop(context);
-                                  
+
+                                  // ACTUALIZA DISCIPLINAS DEL CLIENTE
+                                  final clienteDisciplinaProvider = Provider.of<ClienteDisciplinaProvider>(context, listen: false);
+                                  // Elimina todas las disciplinas actuales del cliente
+                                  await clienteDisciplinaProvider.eliminarPorCliente(id);
+
+                                  // Agrega las disciplinas seleccionadas
+                                  for (final idDisciplina in disciplinasSeleccionadas) {
+                                    await clienteDisciplinaProvider.agregarClienteDisciplina(
+                                      ClienteDisciplinaModel(
+                                        idCliente: id,
+                                        idDisciplina: idDisciplina,
+                                      ),
+                                    );
+                                  }
+
+                                  Navigator.pop(context);                                  
                                 }
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text(widget.estaEditando == false ? "👌Cliente guardado" : "👌Cliente actualizado")),

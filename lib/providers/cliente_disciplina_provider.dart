@@ -26,4 +26,10 @@ class ClienteDisciplinaProvider extends ChangeNotifier {
     // await cargarPorCliente(idCliente);
     notifyListeners();
   }
+
+  Future<void> eliminarPorCliente(int idCliente) async {
+  await repo.eliminarPorCliente(idCliente);
+  await cargarPorCliente(idCliente);
+  notifyListeners();
+}
 }

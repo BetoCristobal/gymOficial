@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mygym/views/gestion_disciplinas.dart';
 import 'package:mygym/views/reportes_screen.dart';
 
 class ClientesDrawer extends StatelessWidget {
@@ -28,8 +29,7 @@ class ClientesDrawer extends StatelessWidget {
                     leading: FaIcon(FontAwesomeIcons.dumbbell, color: Colors.black,),
                     title: Text('Gestionar disciplinas'),
                     onTap: () {
-                      Navigator.pop(context);
-                      // Acción para gestionar disciplinas
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => GestionDisciplinasScreen()));
                     },
                   ),
                   ListTile(

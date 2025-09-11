@@ -5,10 +5,10 @@ class ClienteRepository {
 
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
-  Future<void> insertCliente(ClienteModel cliente) async {
+  Future<int> insertCliente(ClienteModel cliente) async {
     final db = await _dbHelper.database;
     print(cliente);
-    await db.insert('clientes', cliente.toMap());
+    return await db.insert('clientes', cliente.toMap());
   }
 
   //En esta línea de código en Flutter, el parámetro conflictAlgorithm especifica 
