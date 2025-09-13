@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mygym/data/models/cliente_model.dart';
 import 'package:mygym/data/repositories/cliente_repository.dart';
+import 'package:mygym/providers/cliente_disciplina_provider.dart';
+import 'package:mygym/providers/disciplina_provider.dart';
 
 enum Opciones {todos, vencidos, urgentes, proximos, corrientes}
 
@@ -22,6 +24,11 @@ class ClienteProvider extends ChangeNotifier{
   List<ClienteModel> get clientes => _clientes;
   List<ClienteModel> get clientesFiltrados => _clientesFiltrados;
   String get busqueda => _busqueda;
+
+  set clientesFiltrados(List<ClienteModel> value) {
+    _clientesFiltrados = value;
+    notifyListeners();
+  }
 
   Future<void> cargarClientes() async {    
     try{      
@@ -193,9 +200,5 @@ class ClienteProvider extends ChangeNotifier{
       }).toList();
       notifyListeners();
     }
-  }
-
-  
-
-  
+  } 
 }

@@ -3,12 +3,14 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mygym/data/models/pago_model.dart';
 import 'package:mygym/providers/cliente_disciplina_provider.dart';
 import 'package:mygym/providers/cliente_provider.dart';
+import 'package:mygym/providers/disciplina_provider.dart';
 import 'package:mygym/providers/pago_provider.dart';
 import 'package:mygym/views/ver_fotos.dart';
 import 'package:mygym/widgets/clientes/barra_busqueda.dart';
 import 'package:mygym/widgets/clientes/cliente_card.dart';
 import 'package:mygym/widgets/clientes/clientes_drawer.dart';
 import 'package:mygym/widgets/clientes/form_agregar_editar_cliente.dart';
+import 'package:mygym/widgets/clientes/form_filtro_disciplina.dart';
 import 'package:mygym/widgets/clientes/my_toggle_buttons.dart';
 import 'package:provider/provider.dart';
 
@@ -42,6 +44,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
       }
     });
     Provider.of<PagoProvider>(context, listen: false).cargarPagosTodosById();
+    Provider.of<DisciplinaProvider>(context, listen: false).cargarDisciplinas();
   }
 
   void _unfocusTextField() {
@@ -82,6 +85,19 @@ class _ClientesScreenState extends State<ClientesScreen> {
           backgroundColor: Colors.black,
           titleTextStyle: TextStyle(fontSize: 23, color: Colors.white),
           actions: [
+            // ICONO APLICAR FILTROS
+          IconButton(
+            highlightColor: Colors.white38,
+            onPressed: () {
+            showModalBottomSheet(
+              context: context, 
+              builder: (BuildContext context) {
+                return FormFiltroDisciplina(
+                  
+                );
+              }
+            );
+          }, icon: const Icon(Icons.filter_alt_outlined)),
             //------------------------------Icono Ver Fotos Huerfanas
             IconButton(
               highlightColor: Colors.white38,
@@ -175,17 +191,17 @@ class _ClientesScreenState extends State<ClientesScreen> {
                               );          
                           
                               return FutureBuilder<List<String>>(
-      future: Provider.of<ClienteDisciplinaProvider>(context, listen: false)
-          .getNombresDisciplinasPorCliente(cliente.id!),
-      builder: (context, snapshot) {
-        final disciplinas = snapshot.data ?? [];
-        return ClienteCard(
-          cliente: cliente,
-          ultimoPago: ultimoPago,
-          disciplinas: disciplinas,
-        );
-      },
-    );
+                                future: Provider.of<ClienteDisciplinaProvider>(context, listen: false)
+                                    .getNombresDisciplinasPorCliente(cliente.id!),
+                                builder: (context, snapshot) {
+                                  final disciplinas = snapshot.data ?? [];
+                                  return ClienteCard(
+                                    cliente: cliente,
+                                    ultimoPago: ultimoPago,
+                                    disciplinas: disciplinas,
+                                  );
+                                },
+                              );
                             }
                           );            
                         },

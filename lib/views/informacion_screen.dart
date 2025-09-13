@@ -7,7 +7,6 @@ import 'package:mygym/data/models/cliente_model.dart';
 import 'package:mygym/data/models/pago_model.dart';
 import 'package:mygym/providers/cliente_disciplina_provider.dart';
 import 'package:mygym/providers/cliente_provider.dart';
-import 'package:mygym/providers/disciplina_provider.dart';
 import 'package:mygym/providers/pago_provider.dart';
 import 'package:mygym/styles/text_styles.dart';
 import 'package:mygym/utils/asignar_color_estatus_informacion.dart';
@@ -41,19 +40,6 @@ class _InformacionScreenState extends State<InformacionScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-    final clienteDisciplinaProvider = Provider.of<ClienteDisciplinaProvider>(context);
-    final disciplinaProvider = Provider.of<DisciplinaProvider>(context);
-
-    final disciplinasCliente = clienteDisciplinaProvider.clienteDisciplinas
-        .where((cd) => cd.idCliente == widget.clienteId)
-        .map((cd) => disciplinaProvider.disciplinas.firstWhere(
-            (d) => d.id == cd.idDisciplina,
-            orElse: () => null!))
-        .where((d) => d != null)
-        .map((d) => d!.nombre)
-        .toList();
-
     final clienteProvider = Provider.of<ClienteProvider>(context);
     ClienteModel cliente;
     try {
