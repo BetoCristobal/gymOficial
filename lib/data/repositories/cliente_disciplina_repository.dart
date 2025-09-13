@@ -38,4 +38,20 @@ class ClienteDisciplinaRepository {
   final db = await _dbHelper.database;
   await db.delete('cliente_disciplinas', where: 'id_cliente = ?', whereArgs: [idCliente]);
 }
+
+
+
+Future<List<String>> getNombresDisciplinasPorCliente(int idCliente) async {
+  final db = await _dbHelper.database;
+  final List<Map<String, dynamic>> maps = await db.rawQuery(
+    '''
+    SELECT d.nombre
+    FROM cliente_disciplinas cd
+    JOIN disciplinas d ON cd.id_disciplina = d.id
+    WHERE cd.id_cliente = ?
+    ''',
+    [idCliente],
+  );
+  return maps.map((map) => map['nombre'] as String).toList();
+}
 }

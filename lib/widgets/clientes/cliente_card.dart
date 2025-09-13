@@ -13,10 +13,11 @@ import 'package:mygym/widgets/clientes/popupMenu/form_agregar_editar_pago.dart';
 import 'package:provider/provider.dart';
 
 class ClienteCard extends StatelessWidget {
+  final List<String> disciplinas;
   final ClienteModel cliente;
   final PagoModel ultimoPago;
 
-  const ClienteCard({super.key, required this.cliente, required this.ultimoPago});  
+  const ClienteCard({super.key, required this.cliente, required this.ultimoPago, required this.disciplinas});  
 
   @override
   Widget build(BuildContext context) {   
@@ -78,8 +79,7 @@ class ClienteCard extends StatelessWidget {
                             Text("Pago: $txtFechaPago", style: TextStyles.textoCardCliente),
                             Text("Prox. pago: $txtProximaFechaPago", style: TextStyles.textoCardCliente),
                             Visibility(visible: ultimoPago.idCliente == 100000 ? false : true, 
-                              child: Text('Días restantes: $diasRestantes', style: TextStyles.textoCardCliente)), 
-                            //Text('Estatus: ${cliente.estatus}', style: TextStyles.textoCardCliente,)
+                              child: Text('Días restantes: $diasRestantes', style: TextStyles.textoCardCliente)),                             
                           ],
                         ),
 
@@ -99,29 +99,7 @@ class ClienteCard extends StatelessWidget {
                                 return FormAgregarEditarPago(idCliente: cliente.id!, estaEditando: false,);
                               }
                             );
-                            break;
-                  
-                          // case 'ver_pagos':
-                          //   VerPagos(context, cliente);
-                          //   break;
-                  
-                          // case 'enviar_whatsapp':
-                          //   enviarWhatsapp(ultimoPago.proximaFechaPago, cliente.telefono);
-                          //   break;
-                  
-                          // case 'editar_cliente':
-                          //   showModalBottomSheet(
-                          //     isScrollControlled: true,
-                          //     context: context, 
-                          //     builder: (BuildContext context) {
-                          //       return FormAgregarEditarCliente(estaEditando: true, cliente: cliente,);
-                          //     }
-                          //   );
-                          //   break;
-                  
-                          // case 'eliminar_cliente':
-                          //   AlertDialogEliminarCliente(context, cliente.id!);
-                          //   break;
+                            break;                  
                         }
                       },
                       itemBuilder: (BuildContext context) {
@@ -133,28 +111,24 @@ class ClienteCard extends StatelessWidget {
                           PopupMenuItem(
                             value: "realizar_pago",
                             child: Text("Realizar pago")
-                          ),
-                          // PopupMenuItem(
-                          //   value: "ver_pagos",
-                          //   child: Text("Ver pagos")
-                          // ),
-                          // PopupMenuItem(
-                          //   value: "enviar_whatsapp",
-                          //   child: Text("Enviar WhatsApp")
-                          // ),
-                          // PopupMenuItem(
-                          //   value: "editar_cliente",
-                          //   child: Text("Editar cliente")
-                          // ),
-                          // PopupMenuItem(
-                          //   value: 'eliminar_cliente',
-                          //   child: Text("Eliminar cliente")
-                          // ),
+                          ),                          
                         ];
                       }
                     ),
+
+                    
                       ],
                     ), 
+                    if (disciplinas.isNotEmpty)
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Wrap(
+                          spacing: 6,
+                          children: disciplinas.map((nombre) => Chip(label: Text(nombre))).toList(),
+                        ),
+                      ),
+                    if (disciplinas.isEmpty)
+                      Text("Sin disciplinas", style: TextStyle(color: const Color.fromARGB(255, 255, 255, 255))),
                   ],
                 ),
               ),

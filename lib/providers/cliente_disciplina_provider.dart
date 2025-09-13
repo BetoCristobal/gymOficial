@@ -32,4 +32,11 @@ class ClienteDisciplinaProvider extends ChangeNotifier {
   await cargarPorCliente(idCliente);
   notifyListeners();
 }
+
+
+
+
+  Future<List<String>> getNombresDisciplinasPorCliente(int idCliente) async {
+  return await repo.getNombresDisciplinasPorCliente(idCliente);
+}
 }

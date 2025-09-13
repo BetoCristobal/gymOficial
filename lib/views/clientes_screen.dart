@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mygym/data/models/pago_model.dart';
+import 'package:mygym/providers/cliente_disciplina_provider.dart';
 import 'package:mygym/providers/cliente_provider.dart';
 import 'package:mygym/providers/pago_provider.dart';
 import 'package:mygym/views/ver_fotos.dart';
@@ -133,6 +134,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
                         },
                         focusNode: _searchFocusNode
                       )
+                      
                     );
                   }
                 ),
@@ -172,7 +174,18 @@ class _ClientesScreenState extends State<ClientesScreen> {
                                   tipoPago: "ninguno"),
                               );          
                           
-                              return ClienteCard(cliente: cliente, ultimoPago: ultimoPago,);
+                              return FutureBuilder<List<String>>(
+      future: Provider.of<ClienteDisciplinaProvider>(context, listen: false)
+          .getNombresDisciplinasPorCliente(cliente.id!),
+      builder: (context, snapshot) {
+        final disciplinas = snapshot.data ?? [];
+        return ClienteCard(
+          cliente: cliente,
+          ultimoPago: ultimoPago,
+          disciplinas: disciplinas,
+        );
+      },
+    );
                             }
                           );            
                         },
