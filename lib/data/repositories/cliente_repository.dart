@@ -96,15 +96,25 @@ class ClienteRepository {
 
 
   Future<List<String>> obtenerFotosPathDesdeBD() async {
-  final db = await _dbHelper.database;
-  final List<Map<String, dynamic>> clientes = await db.query('clientes');
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> clientes = await db.query('clientes');
 
-  return clientes
-    .map((cliente) => cliente['fotoPath'] as String?)
-    .where((path) => path != null && path.isNotEmpty)
-    .cast<String>()
-    .toList();
+    return clientes
+      .map((cliente) => cliente['fotoPath'] as String?)
+      .where((path) => path != null && path.isNotEmpty)
+      .cast<String>()
+      .toList();
 
-}
+  }
+
+  Future<List<int>> getClientesPorDisciplina(int idDisciplina) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'cliente_disciplinas',
+      where: 'id_disciplina = ?',
+      whereArgs: [idDisciplina],
+    );
+    return maps.map((map) => map['id_cliente'] as int).toList();
+  }
 
 }

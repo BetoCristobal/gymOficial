@@ -201,4 +201,10 @@ class ClienteProvider extends ChangeNotifier{
       notifyListeners();
     }
   } 
+
+  void filtrarClientesPorIds(List<int> idsClientes) {
+    _clientesFiltrados = _clientes.where((cliente) => idsClientes.contains(cliente.id)).toList();
+    notifyListeners();
+  }
+  
 }

@@ -1,6 +1,8 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mygym/data/repositories/cliente_repository.dart';
+import 'package:mygym/providers/cliente_provider.dart';
 import 'package:mygym/providers/disciplina_provider.dart';
 import 'package:mygym/styles/text_styles.dart';
 import 'package:provider/provider.dart';
@@ -52,13 +54,13 @@ class _FormFiltroDisciplinaState extends State<FormFiltroDisciplina> {
                               child: Text("Todas"),
                             ),
                             ...disciplinas.map((d) => DropdownMenuItem(
-                              value: d.nombre,
+                              value: d.id?.toString(),
                               child: Text(d.nombre)
                             ))
                           ],
                           onChanged: (value) {
                             setState(() {
-                              
+                              _selectedDisciplina = value;
                             });
                           },
                           buttonStyleData: ButtonStyleData(
@@ -98,8 +100,21 @@ class _FormFiltroDisciplinaState extends State<FormFiltroDisciplina> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 29, 173, 33)
                     ),
-                    onPressed: () {
-                      
+                    onPressed: () async {
+                      final clienteProvider = Provider.of<ClienteProvider>(context, listen: false);
+                      final clienteRepo = ClienteRepository();
+
+                      if (_selectedDisciplina == null) {
+                        // Si selecciona "Todas", muestra todos los clientes
+                        clienteProvider.filtrarClientesPorIds(
+                          clienteProvider.clientes.map((c) => c.id!).toList()
+                        );
+                      } else {
+                        // Obtiene los ids de clientes inscritos en la disciplina seleccionada
+                        final idsClientes = await clienteRepo.getClientesPorDisciplina(int.parse(_selectedDisciplina!));
+                        clienteProvider.filtrarClientesPorIds(idsClientes);
+                      }
+
                       Navigator.pop(context);
                     }, 
                   ),
