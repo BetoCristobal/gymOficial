@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mygym/views/gestion_disciplinas.dart';
 import 'package:mygym/views/reportes_screen.dart';
+import 'package:mygym/views/respaldos_screen.dart';
 
 class ClientesDrawer extends StatelessWidget {
   const ClientesDrawer({super.key});
@@ -36,8 +37,7 @@ class ClientesDrawer extends StatelessWidget {
                     leading: FaIcon(FontAwesomeIcons.floppyDisk, color: Colors.black,),
                     title: Text('Respaldos'),
                     onTap: () {
-                      Navigator.pop(context);
-                      // Acción para gestionar disciplinas
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => RespaldosScreen()));
                     },
                   ),
                   ListTile(

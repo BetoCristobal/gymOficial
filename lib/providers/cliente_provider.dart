@@ -2,8 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mygym/data/models/cliente_model.dart';
 import 'package:mygym/data/repositories/cliente_repository.dart';
-import 'package:mygym/providers/cliente_disciplina_provider.dart';
-import 'package:mygym/providers/disciplina_provider.dart';
 
 enum Opciones {todos, vencidos, urgentes, proximos, corrientes}
 

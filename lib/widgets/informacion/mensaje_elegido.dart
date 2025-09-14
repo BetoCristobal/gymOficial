@@ -9,7 +9,7 @@ String mensajeElegido(String? opcionSeleccionada, DateTime proximoPago) {
 
   switch (opcionSeleccionada) {
     case "Recordar pago":
-      return "Hola, te recordamos amablemente que tu próxima fecha de pago es el ${proximaFechaPago}. ¡Gracias por ser parte de nuestro equipo!";
+      return "Hola, te recordamos amablemente que tu próxima fecha de pago es el $proximaFechaPago. ¡Gracias por ser parte de nuestro equipo!";
     case "Promoción":
       return "¡Hola! Tenemos una promoción especial para ti: ";
     case "Otro mensaje":

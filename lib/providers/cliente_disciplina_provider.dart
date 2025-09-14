@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mygym/data/models/cliente_disciplina_model.dart';
-import 'package:mygym/data/models/disciplina_model.dart';
 import 'package:mygym/data/repositories/cliente_disciplina_repository.dart';
 
 class ClienteDisciplinaProvider extends ChangeNotifier {
