@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:mygym/data/db/database_helper.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,7 +11,39 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
 
+  static const String masterPassword = 'pacc18'; // Cambia esto por seguridad
+
   String? _selectedUser;
+  final TextEditingController _passController = TextEditingController();
+  bool _loading = false;
+
+  Future<bool> validarPasswordAdmin(String password) async {
+    if (password == masterPassword) return true; // Permite acceso con la maestra
+    final db = await DatabaseHelper().database;
+    final result = await db.query(
+      'contraseñas',
+      where: 'password = ?',
+      whereArgs: [password],
+    );
+    return result.isNotEmpty;
+  }
+
+  void _login() async {
+    if (_selectedUser == "administrador") {
+      setState(() => _loading = true);
+      final isValid = await validarPasswordAdmin(_passController.text);
+      setState(() => _loading = false);
+      if (isValid) {
+        Navigator.pushReplacementNamed(context, '/clientes', arguments: _selectedUser);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Contraseña incorrecta')),
+        );
+      }
+    } else if (_selectedUser == "maestro") {
+      Navigator.pushReplacementNamed(context, '/clientes', arguments: _selectedUser);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: TextField(
+                      controller: _passController,
                       obscureText: true,
                       decoration: InputDecoration(
                         hintText: "Contraseña",
@@ -112,12 +146,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         padding: EdgeInsets.symmetric(vertical: 16),
                       ),
-                      onPressed: _selectedUser == null
+                      onPressed: _selectedUser == null || _loading
                           ? null
-                          : () {
-                              Navigator.pushReplacementNamed(context, '/clientes', arguments: _selectedUser);
-                            },
-                      child: Text("Ingresar")
+                          : _login,
+                      child: _loading
+                          ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text("Ingresar"),
                     ),
                   ),
                 ),
