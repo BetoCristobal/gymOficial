@@ -13,6 +13,12 @@ class DatabaseHelper {
     return _database!;
   }
 
+  Future<void> closeDatabase() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null; // <-- Esto es clave
+    }
+  }
 
   Future<Database> _initDatabase() async {
     try {

@@ -23,12 +23,16 @@ class FuncionesFoto {
 
   static Future<String> guardarFoto(File fotoTomada) async {
     final appDir = await getApplicationDocumentsDirectory();
+    // Crea la subcarpeta 'fotos_usuarios' si no existe
+    final fotosDir = Directory(p.join(appDir.path, 'fotos_usuarios'));
+    if (!await fotosDir.exists()) {
+      await fotosDir.create(recursive: true);
+    }
     final nombreArchivo = 'cliente_${DateTime.now().millisecondsSinceEpoch}.jpg';
-    final pathDestino = p.join(appDir.path, nombreArchivo);
+    final pathDestino = p.join(fotosDir.path, nombreArchivo);
 
     final File nuevaFoto = await fotoTomada.copy(pathDestino);
 
     return nuevaFoto.path;
   }
 }
-
