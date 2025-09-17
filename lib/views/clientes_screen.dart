@@ -82,7 +82,12 @@ class _ClientesScreenState extends State<ClientesScreen> {
 
         appBar: AppBar(
           iconTheme: IconThemeData(color: Colors.white),
-          title: Text("Clientes"),
+          title: Consumer<ClienteProvider>(
+            builder: (context, clienteProvider, _) {
+              final total = clienteProvider.clientesFiltrados.length;
+              return Text("Clientes ($total)", style: TextStyle(color: Colors.white),);
+            }
+          ),
           backgroundColor: Colors.black,
           titleTextStyle: TextStyle(fontSize: 23, color: Colors.white),
           actions: [
