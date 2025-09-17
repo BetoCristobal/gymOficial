@@ -60,21 +60,33 @@ class _RespaldosScreenState extends State<RespaldosScreen> {
       print("✅ Base de datos agregada al ZIP: $dbPath");
     }
 
-    // Agregar la carpeta fotos_usuarios
+    // 🔹 Agregar la carpeta fotos_usuarios (ahora con todos los archivos)
     if (await fotosDir.exists()) {
-      encoder.addDirectory(fotosDir);
-      print("✅ Carpeta fotos_usuarios agregada al ZIP: ${fotosDir.path}");
+      await for (var entity in fotosDir.list(recursive: true, followLinks: false)) {
+        if (entity is File) {
+          final relativePath = entity.path.substring(appDir.path.length + 1);
+          encoder.addFile(entity, relativePath);
+          print("📷 Foto agregada: $relativePath");
+        }
+      }
+      print("✅ Carpeta fotos_usuarios agregada al ZIP con todas las fotos");
     }
 
-    // 🔹 Garantizar que el ZIP no quede vacío
+    // 🔹 Agregar archivo LEEME para que el ZIP nunca quede vacío
     final readmeFile = File(join(tempDir.path, "LEEME.txt"));
-    await readmeFile.writeAsString("Este es un respaldo generado por MyGym.\nIncluye base de datos y fotos_usuarios.");
+    await readmeFile.writeAsString(
+      "Este es un respaldo generado por MyGym.\nIncluye base de datos y fotos_usuarios."
+    );
     encoder.addFile(readmeFile);
 
     encoder.close();
 
-    await Share.shareXFiles([XFile(zipPath)], text: 'Respaldo completo de MyGym');
+    await Share.shareXFiles(
+      [XFile(zipPath)],
+      text: 'Respaldo completo de MyGym'
+    );
   }
+
 
   /// Importar ZIP y restaurar DB y la subcarpeta fotos_usuarios
   Future<void> importarBackup() async {
@@ -148,19 +160,21 @@ class _RespaldosScreenState extends State<RespaldosScreen> {
 
   /// Función auxiliar para copiar directorios recursivamente
   Future<void> _copyDirectory(Directory source, Directory destination) async {
-    if (!await destination.exists()) {
-      await destination.create(recursive: true);
-    }
+  if (!await destination.exists()) {
+    await destination.create(recursive: true);
+  }
 
-    await for (var entity in source.list(recursive: false)) {
-      if (entity is Directory) {
-        var newDirectory = Directory(join(destination.path, basename(entity.path)));
-        await _copyDirectory(entity, newDirectory);
-      } else if (entity is File) {
-        await entity.copy(join(destination.path, basename(entity.path)));
-      }
+  await for (var entity in source.list(recursive: true)) {
+    final relativePath = entity.path.substring(source.path.length + 1);
+    final newPath = join(destination.path, relativePath);
+
+    if (entity is Directory) {
+      await Directory(newPath).create(recursive: true);
+    } else if (entity is File) {
+      await entity.copy(newPath);
     }
-  } 
+  }
+}
 
   @override
   Widget build(BuildContext context) {
