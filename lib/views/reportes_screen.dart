@@ -77,10 +77,10 @@ class _ReportesScreenState extends State<ReportesScreen> {
             highlightColor: Colors.white38,
             onPressed: () async {
               final provider = Provider.of<ReportesProvider>(context, listen: false);
-              await exportarReportePDFYGuardarEnDescargas(provider);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("✅ PDF guardado en Documentos")),
-              );
+              await exportarReportePDFYCompartir(provider);
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text("✅ PDF guardado en Documentos")),
+              // );
             }, 
             icon: const Icon(Icons.picture_as_pdf)
           ),

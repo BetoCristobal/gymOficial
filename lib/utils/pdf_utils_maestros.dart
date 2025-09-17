@@ -4,13 +4,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:share_plus/share_plus.dart';
 
-Future<void> exportarReportePDFYCompartir(ReportesProvider reportesProvider) async {
+Future<String> exportarReportePDFParaCompartir(ReportesProvider reportesProvider) async {
   final pdf = pw.Document();
   final formatter = DateFormat('dd-MM-yyyy');
 
-  // Crear contenido del PDF
   pdf.addPage(
     pw.MultiPage(
       pageFormat: PdfPageFormat.letter,
@@ -41,12 +39,23 @@ Future<void> exportarReportePDFYCompartir(ReportesProvider reportesProvider) asy
     )
   );
 
-  // Guardar el PDF en un archivo temporal
-  final tempDir = await getTemporaryDirectory();
+  Directory? documentosDir;
+  if (Platform.isAndroid) {
+    final String documentosPath = "/storage/emulated/0/Documents";
+    documentosDir = Directory(documentosPath);
+    if (!await documentosDir.exists()) {
+      await documentosDir.create(recursive: true);
+    }
+  } else {
+    documentosDir = await getApplicationDocumentsDirectory();
+  }
+
   final nombreArchivo = "reporte_pagos_${DateTime.now().microsecondsSinceEpoch}.pdf";
-  final archivo = File('${tempDir.path}/$nombreArchivo');
+  final archivo = File('${documentosDir.path}/$nombreArchivo');
   await archivo.writeAsBytes(await pdf.save());
 
-  // Compartir el PDF usando share_plus
-  await Share.shareXFiles([XFile(archivo.path)], text: "Reporte de pagos generado por MyGym");
+  print("✅ PDF guardado en Documentos");
+  print("Ruta del archivo: ${archivo.path}");
+
+  return archivo.path; // <--- Devuelve la ruta del PDF
 }

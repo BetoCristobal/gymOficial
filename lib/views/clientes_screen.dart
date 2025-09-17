@@ -11,6 +11,7 @@ import 'package:mygym/widgets/clientes/cliente_card.dart';
 import 'package:mygym/widgets/clientes/clientes_drawer.dart';
 import 'package:mygym/widgets/clientes/form_agregar_editar_cliente.dart';
 import 'package:mygym/widgets/clientes/form_filtro_disciplina.dart';
+import 'package:mygym/widgets/clientes/form_filtros_maestro.dart';
 import 'package:mygym/widgets/clientes/my_toggle_buttons.dart';
 import 'package:provider/provider.dart';
 
@@ -110,7 +111,12 @@ class _ClientesScreenState extends State<ClientesScreen> {
             IconButton(
               highlightColor: Colors.white38,
               onPressed: () {
-                
+                showModalBottomSheet(
+              context: context, 
+              builder: (BuildContext context) {
+                return FormFiltrosMaestro();
+              }
+            );
               }, 
               icon: FaIcon(FontAwesomeIcons.paperPlane), color: Colors.white,),
           ],

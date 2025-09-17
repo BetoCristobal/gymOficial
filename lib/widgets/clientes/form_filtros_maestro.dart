@@ -1,21 +1,21 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:mygym/providers/reportes_provider.dart';
 import 'package:mygym/styles/text_styles.dart';
+import 'package:mygym/utils/pdf_utils_maestros.dart';
 import 'package:mygym/utils/seleccionar_fecha.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
-class FormAplicarFiltros extends StatefulWidget {
-  const FormAplicarFiltros({super.key});
+class FormFiltrosMaestro extends StatefulWidget {
+  const FormFiltrosMaestro({super.key});
 
   @override
-  State<FormAplicarFiltros> createState() => _FormAplicarFiltrosState();
+  State<FormFiltrosMaestro> createState() => _FormFiltrosMaestroState();
 }
 
-class _FormAplicarFiltrosState extends State<FormAplicarFiltros> {
-
+class _FormFiltrosMaestroState extends State<FormFiltrosMaestro> {
   final GlobalKey<FormState> formFiltro = GlobalKey<FormState>();
 
   final List<String> options = ['Todos', 'Efectivo', 'Tarjeta', 'Transferencia'];
@@ -39,7 +39,7 @@ class _FormAplicarFiltrosState extends State<FormAplicarFiltros> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 10),
-                  child: Text("Aplicar filtro:", style: TextStyles.tituloShowModal,  ),
+                  child: Text("Enviar reporte:", style: TextStyles.tituloShowModal,  ),
                 ),
             
                 //LISTA DROPDOWN
@@ -50,37 +50,23 @@ class _FormAplicarFiltrosState extends State<FormAplicarFiltros> {
                     borderRadius: BorderRadius.circular(10),
                     color: const Color.fromARGB(255, 0, 132, 255),  
                   ),
-                  child: DropdownButton2<String>(
-                    isExpanded: true,
-                    dropdownStyleData: DropdownStyleData(
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 0, 132, 255),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    buttonStyleData: ButtonStyleData(
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 0, 132, 255),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                    ),
-                    iconStyleData: IconStyleData(
-                      icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-                    ),
-                    hint: Text("Elige una forma de pago", style: TextStyle(color: Colors.white)),
+                  child: DropdownButton<String>(
+                    borderRadius: BorderRadius.circular(10),
+                    dropdownColor: const Color.fromARGB(255, 0, 132, 255),
+                    icon: Icon(Icons.arrow_drop_down, color: Colors.white,),                  
+                    hint: Text("Elige una forma de pago", style: TextStyle(color: Colors.white),),
                     value: valorDropDownButton,
                     items: options.map((String option) {
                       return DropdownMenuItem(
                         value: option,
-                        child: Text(option, style: TextStyle(color: Colors.white)),
+                        child: Text(option, style: TextStyle(color: Colors.white),)
                       );
-                    }).toList(),
+                    }).toList(), 
                     onChanged: (String? newValue) {
                       setState(() {
                         valorDropDownButton = newValue;
                       });
-                    },
+                    }
                   ),
                 ),
             
@@ -121,21 +107,10 @@ class _FormAplicarFiltrosState extends State<FormAplicarFiltros> {
                             ),
                             onPressed: () async {
                               fechaFin = await seleccionarFecha(context);
-                              if (fechaFin != null && fechaInicio != null &&
-                                  (fechaFin!.isAfter(fechaInicio!) || fechaFin!.isAtSameMomentAs(fechaInicio!))) {
+                              if(fechaFin != null) {
                                 setState(() {
                                   txtFechaFin = DateFormat('dd-MM-yyyy').format(fechaFin!);
                                 });
-                              } else {
-                                showDialog(
-                                  context: context, 
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text("Advertencia"),
-                                      content: Text("La fecha fin debe ser igual o posterior a la fecha inicio."),
-                                    );
-                                  }
-                                );
                               }
                             },
                             child: Text(txtFechaFin, style: TextStyle(color: Colors.white),)
@@ -146,29 +121,62 @@ class _FormAplicarFiltrosState extends State<FormAplicarFiltros> {
                   ),
                 ),
             
-                //BOTON APLICAR
+                //------------------------------------------------------------BOTON COMPARTIR
                 Container(
                   width: double.infinity,
                   margin: EdgeInsets.only(top: 10, bottom: 20),
                   child: ElevatedButton.icon(
-                    icon: Icon(FontAwesomeIcons.check, color: Colors.white,),
-                    label: Text("Aplicar", style: TextStyle(color: Colors.white),),
+                    icon: Icon(FontAwesomeIcons.paperPlane, color: Colors.white,),
+                    label: Text("Compartir", style: TextStyle(color: Colors.white),),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 29, 173, 33)
                     ),
-                    onPressed: () {
-                      if(fechaInicio != null && fechaFin != null && valorDropDownButton != null) {
-                        print("FILTROS APLICADOS");
-                        if(valorDropDownButton == "Todos") {
-                          Provider.of<ReportesProvider>(context, listen: false).cargarReportesFiltradosTodosPorFecha(fechaInicio!, fechaFin!);
-                          Navigator.pop(context);
+                    onPressed: () async {
+                      if (fechaInicio != null && fechaFin != null && valorDropDownButton != null) {
+                        if (fechaFin!.isBefore(fechaInicio!)) {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("Advertencia"),
+                                content: Text("La fecha fin debe ser igual o posterior a la fecha inicio."),
+                              );
+                            }
+                          );
+                          return;
+                        }
+
+                        // Aplica el filtro según tu lógica actual...
+                        if (fechaInicio == fechaFin) {
+                          if (valorDropDownButton == "Todos") {
+                            Provider.of<ReportesProvider>(context, listen: false)
+                                .cargarReportesFiltradosTodosPorFecha(fechaInicio!, fechaFin!);
+                          } else {
+                            Provider.of<ReportesProvider>(context, listen: false)
+                                .cargarReportesFiltrados(valorDropDownButton!, fechaInicio!, fechaFin!);
+                          }
                         } else {
-                          Provider.of<ReportesProvider>(context, listen: false).cargarReportesFiltrados(valorDropDownButton!, fechaInicio!, fechaFin!);
-                          Navigator.pop(context);
-                        }                      
+                          if (valorDropDownButton == "Todos") {
+                            Provider.of<ReportesProvider>(context, listen: false)
+                                .cargarReportesFiltradosTodosPorFecha(fechaInicio!, fechaFin!);
+                          } else {
+                            Provider.of<ReportesProvider>(context, listen: false)
+                                .cargarReportesFiltrados(valorDropDownButton!, fechaInicio!, fechaFin!);
+                          }
+                        }
+
+                        // Espera a que los datos se carguen si es necesario
+                        await Future.delayed(Duration(milliseconds: 500));
+
+                        // Genera el PDF y comparte
+                        final reportesProvider = Provider.of<ReportesProvider>(context, listen: false);
+                        final pdfPath = await exportarReportePDFParaCompartir(reportesProvider);
+                        await Share.shareXFiles([XFile(pdfPath)], text: "Reporte de pagos");
+
+                        Navigator.pop(context);
                       } else {
                         showDialog(
-                          context: context, 
+                          context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
                               title: Text("Advertencia"),
