@@ -42,6 +42,7 @@ class _FormFiltroDisciplinaState extends State<FormFiltroDisciplina> {
                     final disciplinas = disciplinaProvider.disciplinas;
 
                     return DropdownButton2<String>(
+                      underline: SizedBox(),
                           isExpanded: true,
                           hint: Text(
                             'Elija disciplina',

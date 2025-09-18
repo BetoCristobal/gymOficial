@@ -64,6 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: DropdownButton2<String>(
+                    underline: SizedBox(),
                     isExpanded: true,
                     hint: Text(
                       'Elija usuario',

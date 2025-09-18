@@ -1,3 +1,4 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
@@ -99,28 +100,34 @@ final clienteProvider = Provider.of<ClienteProvider>(context, listen: false);
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 10),
                     
-                    child: DropdownButton<String>(
-                      borderRadius: BorderRadius.circular(10),
-                      dropdownColor: const Color.fromARGB(255, 0, 132, 255),
-                      icon: const Icon(Icons.arrow_drop_down, color: Colors.white,),
-                      hint: const Text(
-                        "Elige una forma de pago", 
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 255, 255, 255)
+                    child: DropdownButton2<String>(
+                      isExpanded: true,
+                      underline: SizedBox(), // Elimina la línea debajo del texto
+                      dropdownStyleData: DropdownStyleData(
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 0, 132, 255),
+                          borderRadius: BorderRadius.circular(10),
                         ),
+                      ),
+                      iconStyleData: IconStyleData(
+                        icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                      ),
+                      hint: const Text(
+                        "Elige una forma de pago",
+                        style: TextStyle(color: Colors.white),
                       ),
                       value: valorDropDownButton,
                       items: options.map((String option) {
                         return DropdownMenuItem<String>(
                           value: option,
-                          child: Text(option, style: TextStyle(color: Colors.white),),
+                          child: Text(option, style: TextStyle(color: Colors.white)),
                         );
-                      }).toList(), 
+                      }).toList(),
                       onChanged: (String? newValue) {
                         setState(() {
                           valorDropDownButton = newValue;
                         });
-                      }
+                      },
                     ),
                   ),
                 ),

@@ -147,7 +147,17 @@ class _InformacionScreenState extends State<InformacionScreen> {
                                           isScrollControlled: true,
                                           context: context, 
                                           builder: (BuildContext context) {
-                                            return FormAgregarEditarCliente(estaEditando: true, cliente: cliente,);
+                                            return DraggableScrollableSheet(
+                                              initialChildSize: 0.8, // 80% de la pantalla
+                                              minChildSize: 0.5,
+                                              maxChildSize: 0.95,
+                                              expand: false,
+                                              builder: (context, ScrollController) {
+                                                return SingleChildScrollView(
+                                                  controller: ScrollController,
+                                                  child: FormAgregarEditarCliente(estaEditando: true, cliente: cliente,));
+                                              }
+                                            );
                                           }
                                         );
                                   }, 

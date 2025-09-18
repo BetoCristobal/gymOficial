@@ -134,7 +134,12 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Cambiar contraseña de administrador')),
+      appBar: AppBar(
+        title: Text('Cambiar contraseña'),
+        iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: Colors.black,
+        titleTextStyle: TextStyle(fontSize: 23, color: Colors.white),
+      ),
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => FocusScope.of(context).unfocus(),
@@ -149,14 +154,28 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
                   children: [
                     TextFormField(
                       controller: _oldPassController,
-                      decoration: InputDecoration(labelText: 'Contraseña actual'),
+                      decoration: InputDecoration(
+                        labelText: 'Contraseña actual',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Colors.grey, width: 1),
+                        ),
+                      ),
                       obscureText: true,
                       validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
                     ),
+
                     SizedBox(height: 16),
+
                     TextFormField(
                       controller: _newPassController,
-                      decoration: InputDecoration(labelText: 'Nueva contraseña'),
+                      decoration: InputDecoration(
+                        labelText: 'Nueva contraseña',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Colors.grey, width: 1),
+                        ),
+                      ),
                       obscureText: true,
                       validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
                     ),
@@ -169,6 +188,10 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
                                 _cambiarPassword();
                               }
                             },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepPurple,
+                              foregroundColor: Colors.white,
+                            ),
                             child: Text('Cambiar contraseña'),
                           ),
                     SizedBox(height: 24),

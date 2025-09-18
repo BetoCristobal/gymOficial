@@ -179,21 +179,34 @@ class _RespaldosScreenState extends State<RespaldosScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Respaldos")),
+      appBar: AppBar(
+        title: const Text("Respaldos"),
+        iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: Colors.black,
+        titleTextStyle: TextStyle(fontSize: 23, color: Colors.white),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
             ElevatedButton.icon(
               onPressed: exportarBackup,
-              icon: const Icon(Icons.upload_file),
+              icon: const Icon(Icons.upload_file, color: Colors.white,),
               label: const Text("Exportar y compartir respaldo (DB + Fotos)"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: importarBackup,
-              icon: const Icon(Icons.download),
+              icon: const Icon(Icons.download, color: Colors.white,),
               label: const Text("Importar y restaurar respaldo (ZIP)"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+              ),
             ),
           ],
         ),
