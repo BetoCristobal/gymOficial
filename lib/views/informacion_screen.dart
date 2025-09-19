@@ -199,12 +199,13 @@ class _InformacionScreenState extends State<InformacionScreen> {
                                     context: context,
                                     builder: (_) => Dialog(
                                       backgroundColor: Colors.black,
-                                      insetPadding: EdgeInsets.all(10),
-                                      child: PhotoView(
-                                        imageProvider: FileImage(File(cliente.fotoPath!)),
-                                        backgroundDecoration: BoxDecoration(color: Colors.black),
-                                        minScale: PhotoViewComputedScale.contained,
-                                        maxScale: PhotoViewComputedScale.covered * 2,
+                                      insetPadding: EdgeInsets.symmetric(horizontal: 60, vertical: 120), // Ajusta el tamaño aquí
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: Image.file(
+                                          File(cliente.fotoPath!),
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
                                     ),
                                   );

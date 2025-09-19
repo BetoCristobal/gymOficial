@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Plugin de Android
+        classpath 'com.android.tools.build:gradle:8.6.1'
+    }
+}
+
 allprojects {
     repositories {
         google()
@@ -5,14 +16,18 @@ allprojects {
     }
 }
 
+// Carpeta de build centralizada fuera del proyecto
 rootProject.buildDir = "../build"
 subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
-    project.evaluationDependsOn(":app")
+    buildDir = "${rootProject.buildDir}/${name}"
 }
 
+// Solo mantener evaluationDependsOn si algún subproyecto depende de :app
+// subprojects {
+//     evaluationDependsOn(":app")
+// }
+
+// Tarea clean personalizada
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
