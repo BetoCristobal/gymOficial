@@ -16,7 +16,6 @@ import 'package:mygym/widgets/clientes/popupMenu/alert_dialog_eliminar_cliente.d
 import 'package:mygym/widgets/clientes/popupMenu/alert_dialog_eliminar_pago.dart';
 import 'package:mygym/widgets/clientes/popupMenu/form_agregar_editar_pago.dart';
 import 'package:mygym/widgets/informacion/alert_dialog_whatsapp.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 
 class InformacionScreen extends StatefulWidget {

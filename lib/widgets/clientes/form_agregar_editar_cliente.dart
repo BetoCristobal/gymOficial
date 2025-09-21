@@ -339,125 +339,127 @@ class _FormAgregarEditarClienteState extends State<FormAgregarEditarCliente> {
                 ),            
             
                 // BOTON GUARDAR
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        child: ElevatedButton.icon(
-                          icon: Icon(Icons.cancel, color: Colors.white,),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          }, 
-                          label: Text("Cancelar", style: TextStyle(color: Colors.white),),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red
-                          ),
-                        )
+                Container(
+                  margin: EdgeInsets.only(top: 10, bottom: 20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(                        
+                          child: ElevatedButton.icon(
+                            icon: Icon(Icons.cancel, color: Colors.white,),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            }, 
+                            label: Text("Cancelar", style: TextStyle(color: Colors.white),),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red
+                            ),
+                          )
+                        ),
                       ),
-                    ),
-                
-                    SizedBox(width: 10,),
-                
-                    Expanded(
-                      child: Container(
-                        //margin: EdgeInsets.only(top: 10, bottom: 20),
-                        child: ElevatedButton.icon(
-                          icon: Icon(FontAwesomeIcons.floppyDisk, color: Colors.white,),
-                          label: Text(widget.estaEditando == false ? "Guardar cliente" : "Actualizar cliente", style: TextStyle(color: Colors.white),),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 29, 173, 33)
-                          ),
-                          onPressed: () async {
-                            if(formKey.currentState!.validate()) {
-                              //OBTENEMOS PROVIDER
-                              final clienteProvider = Provider.of<ClienteProvider>(context, listen: false);
-                                  
-                              if (fotoTemporal != null) {
-                                _fotoPath = await FuncionesFoto.guardarFoto(fotoTemporal!);
-                              }
-                              
-                              // SI NO ESTA EDITANDO, OSEA SI SE ESTA AGREGANDO NUEVO CLIENTE
-                              if(widget.estaEditando == false) {
-                                final nuevoClienteId = await clienteProvider.agregarCliente(
-                                  nombresController.text, 
-                                  apellidosController.text, 
-                                  telefonoController.text,
-                                  _fotoPath,
-                                  telefonoEmergenciaController.text,
-                                  nombreEmergenciaController.text,
-                                  correoController.text,
-                                  observacionesController.text                            
-                                );
-                
-                                // Guarda las disciplinas seleccionadas
-                                for (final idDisciplina in disciplinasSeleccionadas) {
-                                  await Provider.of<ClienteDisciplinaProvider>(context, listen: false)
-                                      .agregarClienteDisciplina(ClienteDisciplinaModel(
-                                        idCliente: nuevoClienteId!, // el id del cliente recién creado
-                                        idDisciplina: idDisciplina,
-                                      ));
+                  
+                      SizedBox(width: 10,),
+                  
+                      Expanded(
+                        child: Container(
+                          child: ElevatedButton.icon(
+                            icon: Icon(FontAwesomeIcons.floppyDisk, color: Colors.white,),
+                            label: Text(widget.estaEditando == false ? "Guardar" : "Actualizar", style: TextStyle(color: Colors.white), textAlign: TextAlign.center,),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(255, 29, 173, 33)
+                            ),
+                            onPressed: () async {
+                              if(formKey.currentState!.validate()) {
+                                //OBTENEMOS PROVIDER
+                                final clienteProvider = Provider.of<ClienteProvider>(context, listen: false);
+                                    
+                                if (fotoTemporal != null) {
+                                  _fotoPath = await FuncionesFoto.guardarFoto(fotoTemporal!);
                                 }
-                                  
-                                Navigator.pop(context);
-                              } else if(widget.estaEditando == true) {
-                                int? id = widget.cliente?.id;
-                                  
-                                //VERIFICAMOS SI HAY UNA FOTO ANTERIOR, SI SI HAY LA BORRAMOS
-                                if(_fotoPath != null && widget.cliente?.fotoPath != null) {
-                                  if(_fotoPath != widget.cliente!.fotoPath) {
+                                
+                                // SI NO ESTA EDITANDO, OSEA SI SE ESTA AGREGANDO NUEVO CLIENTE
+                                if(widget.estaEditando == false) {
+                                  final nuevoClienteId = await clienteProvider.agregarCliente(
+                                    nombresController.text, 
+                                    apellidosController.text, 
+                                    telefonoController.text,
+                                    _fotoPath,
+                                    telefonoEmergenciaController.text,
+                                    nombreEmergenciaController.text,
+                                    correoController.text,
+                                    observacionesController.text                            
+                                  );
+                  
+                                  // Guarda las disciplinas seleccionadas
+                                  for (final idDisciplina in disciplinasSeleccionadas) {
+                                    await Provider.of<ClienteDisciplinaProvider>(context, listen: false)
+                                        .agregarClienteDisciplina(ClienteDisciplinaModel(
+                                          idCliente: nuevoClienteId!, // el id del cliente recién creado
+                                          idDisciplina: idDisciplina,
+                                        ));
+                                  }
+                                    
+                                  Navigator.pop(context);
+                                } else if(widget.estaEditando == true) {
+                                  int? id = widget.cliente?.id;
+                                    
+                                  //VERIFICAMOS SI HAY UNA FOTO ANTERIOR, SI SI HAY LA BORRAMOS
+                                  if(_fotoPath != null && widget.cliente?.fotoPath != null) {
+                                    if(_fotoPath != widget.cliente!.fotoPath) {
+                                      final fotoAnterior = File(widget.cliente!.fotoPath!);
+                                      if(await fotoAnterior.exists()) {
+                                        await fotoAnterior.delete();
+                                        print("❌ Foto anterior eliminada: ${widget.cliente!.fotoPath}");
+                                      } 
+                                    }
+                                  } else if (_fotoPath == null && widget.cliente?.fotoPath != null) {
                                     final fotoAnterior = File(widget.cliente!.fotoPath!);
                                     if(await fotoAnterior.exists()) {
                                       await fotoAnterior.delete();
                                       print("❌ Foto anterior eliminada: ${widget.cliente!.fotoPath}");
-                                    } 
+                                    }
                                   }
-                                } else if (_fotoPath == null && widget.cliente?.fotoPath != null) {
-                                  final fotoAnterior = File(widget.cliente!.fotoPath!);
-                                  if(await fotoAnterior.exists()) {
-                                    await fotoAnterior.delete();
-                                    print("❌ Foto anterior eliminada: ${widget.cliente!.fotoPath}");
-                                  }
-                                }
-                                  
-                                await clienteProvider.actualizarCliente(
-                                  id!,
-                                  nombresController.text, 
-                                  apellidosController.text, 
-                                  telefonoController.text,
-                                  widget.cliente!.estatus,
-                                  _fotoPath, // Si se actualiza la foto, se pasa la nueva ruta
-                                  telefonoEmergenciaController.text,
-                                  nombreEmergenciaController.text,
-                                  correoController.text,
-                                  observacionesController.text
-                                );
-                
-                                // ACTUALIZA DISCIPLINAS DEL CLIENTE
-                                final clienteDisciplinaProvider = Provider.of<ClienteDisciplinaProvider>(context, listen: false);
-                                // Elimina todas las disciplinas actuales del cliente
-                                await clienteDisciplinaProvider.eliminarPorCliente(id);
-                
-                                // Agrega las disciplinas seleccionadas
-                                for (final idDisciplina in disciplinasSeleccionadas) {
-                                  await clienteDisciplinaProvider.agregarClienteDisciplina(
-                                    ClienteDisciplinaModel(
-                                      idCliente: id,
-                                      idDisciplina: idDisciplina,
-                                    ),
+                                    
+                                  await clienteProvider.actualizarCliente(
+                                    id!,
+                                    nombresController.text, 
+                                    apellidosController.text, 
+                                    telefonoController.text,
+                                    widget.cliente!.estatus,
+                                    _fotoPath, // Si se actualiza la foto, se pasa la nueva ruta
+                                    telefonoEmergenciaController.text,
+                                    nombreEmergenciaController.text,
+                                    correoController.text,
+                                    observacionesController.text
                                   );
+                  
+                                  // ACTUALIZA DISCIPLINAS DEL CLIENTE
+                                  final clienteDisciplinaProvider = Provider.of<ClienteDisciplinaProvider>(context, listen: false);
+                                  // Elimina todas las disciplinas actuales del cliente
+                                  await clienteDisciplinaProvider.eliminarPorCliente(id);
+                  
+                                  // Agrega las disciplinas seleccionadas
+                                  for (final idDisciplina in disciplinasSeleccionadas) {
+                                    await clienteDisciplinaProvider.agregarClienteDisciplina(
+                                      ClienteDisciplinaModel(
+                                        idCliente: id,
+                                        idDisciplina: idDisciplina,
+                                      ),
+                                    );
+                                  }
+                  
+                                  Navigator.pop(context);                                  
                                 }
-                
-                                Navigator.pop(context);                                  
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(widget.estaEditando == false ? "👌Cliente guardado" : "👌Cliente actualizado")),
+                                );
                               }
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(widget.estaEditando == false ? "👌Cliente guardado" : "👌Cliente actualizado")),
-                              );
-                            }
-                          }, 
+                            }, 
+                          ),
                         ),
-                      ),
-                    ),                      
-                  ],
+                      ),                      
+                    ],
+                  ),
                 )
               ],
             ),

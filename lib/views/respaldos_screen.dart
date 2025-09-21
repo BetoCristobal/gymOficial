@@ -3,6 +3,7 @@ import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
 import 'package:mygym/data/db/database_helper.dart';
 import 'package:mygym/providers/cliente_provider.dart';
+import 'package:mygym/providers/pago_provider.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -149,11 +150,11 @@ class _RespaldosScreenState extends State<RespaldosScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(this.context).showSnackBar(
-          const SnackBar(content: Text('Respaldo restaurado correctamente CHIDO')),
+          const SnackBar(content: Text('💾 Respaldo restaurado correctamente')),
         );
       }
 
-      
+      Provider.of<PagoProvider>(this.context, listen: false).cargarPagosTodosById();
       Provider.of<ClienteProvider>(this.context, listen: false).cargarClientes();
     }
   }

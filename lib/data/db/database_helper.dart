@@ -89,12 +89,13 @@ class DatabaseHelper {
             '''
             CREATE TABLE contraseñas (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
-              password TEXT NOT NULL
+              password TEXT NOT NULL,
+              palabra_clave TEXT NOT NULL
             )
             '''
           );
           // Inserta una contraseña por defecto (puedes cambiarla luego)
-          await db.insert('contraseñas', {'password': '12345'});
+          await db.insert('contraseñas', {'password': '12345', 'palabra_clave': 'gimnasio'});
 
           print("✅ BASE DE DATOS CREADA CON EXITO");//--------------------
         },

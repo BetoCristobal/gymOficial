@@ -11,18 +11,35 @@ class GestionContrasenasScreen extends StatefulWidget {
 }
 
 class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _oldPassController = TextEditingController();
+  final _formPassKey = GlobalKey<FormState>();
+  final _formClaveKey = GlobalKey<FormState>();
+
   final _newPassController = TextEditingController();
+  final _claveController = TextEditingController();
 
-  bool _loading = false;
+  final _claveActualController = TextEditingController();
+  final _nuevaClaveController = TextEditingController();
 
-  Future<bool> cambiarPasswordAdmin(String oldPass, String newPass) async {
+  bool _loadingPass = false;
+  bool _loadingClave = false;
+
+  Future<bool> validarClave(String clave) async {
+    if (clave == masterPassword) return true;
     final db = await DatabaseHelper().database;
     final result = await db.query(
       'contraseñas',
-      where: 'password = ?',
-      whereArgs: [oldPass],
+      where: 'palabra_clave = ?',
+      whereArgs: [clave],
+    );
+    return result.isNotEmpty;
+  }
+
+  Future<bool> cambiarPasswordAdmin(String newPass, String clave) async {
+    final db = await DatabaseHelper().database;
+    final result = await db.query(
+      'contraseñas',
+      where: 'palabra_clave = ? OR ? = ?',
+      whereArgs: [clave, clave, masterPassword],
     );
     if (result.isEmpty) return false;
     await db.update(
@@ -34,100 +51,81 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
     return true;
   }
 
-  Future<void> recuperarContrasenaConMaestra(BuildContext context) async {
-    final TextEditingController masterController = TextEditingController();
-    final TextEditingController nuevaController = TextEditingController();
-    bool _recuperando = false;
-
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return AlertDialog(
-              title: Text('Recuperar contraseña'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: masterController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: 'Contraseña maestra',
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  TextField(
-                    controller: nuevaController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: 'Nueva contraseña',
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: _recuperando ? null : () => Navigator.pop(context),
-                  child: Text('Cancelar'),
-                ),
-                ElevatedButton(
-                  onPressed: _recuperando
-                      ? null
-                      : () async {
-                          setStateDialog(() => _recuperando = true);
-                          if (masterController.text == masterPassword) {
-                            final db = await DatabaseHelper().database;
-                            // Cambia la contraseña al primer registro
-                            await db.update(
-                              'contraseñas',
-                              {'password': nuevaController.text},
-                              where: 'id = 1',
-                            );
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Contraseña restablecida'), duration: Duration(milliseconds: 900)),
-                            );
-                          } else {
-                            setStateDialog(() => _recuperando = false);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Contraseña maestra incorrecta'), duration: Duration(milliseconds: 900)),
-                            );
-                          }
-                        },
-                  child: _recuperando
-                      ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text('Recuperar'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+  Future<bool> cambiarPalabraClave(String claveActual, String nuevaClave) async {
+    final db = await DatabaseHelper().database;
+    final result = await db.query(
+      'contraseñas',
+      where: 'palabra_clave = ? OR ? = ?',
+      whereArgs: [claveActual, claveActual, masterPassword],
     );
+    if (result.isEmpty) return false;
+    await db.update(
+      'contraseñas',
+      {'palabra_clave': nuevaClave},
+      where: 'id = ?',
+      whereArgs: [result.first['id']],
+    );
+    return true;
   }
 
   Future<void> _cambiarPassword() async {
-    setState(() => _loading = true);
+    setState(() => _loadingPass = true);
+
+    final claveValida = await validarClave(_claveController.text);
+    if (!claveValida) {
+      setState(() => _loadingPass = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ Palabra clave incorrecta')),
+      );
+      return;
+    }
+
     final success = await cambiarPasswordAdmin(
-      _oldPassController.text,
       _newPassController.text,
+      _claveController.text,
     );
-    setState(() => _loading = false);
+    setState(() => _loadingPass = false);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(success
-            ? 'Contraseña cambiada correctamente'
-            : 'Contraseña actual incorrecta'),
+            ? '✅ Contraseña cambiada correctamente'
+            : '❌ No se pudo cambiar la contraseña'),
       ),
     );
     if (success) {
-      _oldPassController.clear();
       _newPassController.clear();
+      _claveController.clear();
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    }
+  }
+
+  Future<void> _cambiarPalabraClave() async {
+    setState(() => _loadingClave = true);
+
+    final claveValida = await validarClave(_claveActualController.text);
+    if (!claveValida) {
+      setState(() => _loadingClave = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ Palabra clave actual incorrecta')),
+      );
+      return;
+    }
+
+    final success = await cambiarPalabraClave(
+      _claveActualController.text,
+      _nuevaClaveController.text,
+    );
+    setState(() => _loadingClave = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(success
+            ? '✅ Palabra clave cambiada correctamente'
+            : '❌ No se pudo cambiar la palabra clave'),
+      ),
+    );
+    if (success) {
+      _claveActualController.clear();
+      _nuevaClaveController.clear();
     }
   }
 
@@ -135,7 +133,7 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cambiar contraseña'),
+        title: Text('Gestión de credenciales'),
         iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Colors.black,
         titleTextStyle: TextStyle(fontSize: 23, color: Colors.white),
@@ -147,60 +145,118 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
           padding: const EdgeInsets.all(24.0),
           child: SafeArea(
             child: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextFormField(
-                      controller: _oldPassController,
-                      decoration: InputDecoration(
-                        labelText: 'Contraseña actual',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.grey, width: 1),
-                        ),
-                      ),
-                      obscureText: true,
-                      validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
-                    ),
-
-                    SizedBox(height: 16),
-
-                    TextFormField(
-                      controller: _newPassController,
-                      decoration: InputDecoration(
-                        labelText: 'Nueva contraseña',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.grey, width: 1),
-                        ),
-                      ),
-                      obscureText: true,
-                      validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
-                    ),
-                    SizedBox(height: 24),
-                    _loading
-                        ? CircularProgressIndicator()
-                        : ElevatedButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                _cambiarPassword();
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
-                              foregroundColor: Colors.white,
+              child: Column(
+                children: [
+                  // Bullet y Card para cambiar contraseña
+                  Row(
+                    children: [
+                      Icon(Icons.vpn_key, color: Colors.deepPurple),
+                      SizedBox(width: 8),
+                      Text('Cambiar contraseña', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    ],
+                  ),
+                  Card(
+                    elevation: 4,
+                    margin: EdgeInsets.symmetric(vertical: 16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Form(
+                        key: _formPassKey,
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: _claveController,
+                              decoration: InputDecoration(
+                                labelText: 'Palabra clave',
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
                             ),
-                            child: Text('Cambiar contraseña'),
-                          ),
-                    SizedBox(height: 24),
-                    TextButton(
-                      onPressed: () => recuperarContrasenaConMaestra(context),
-                      child: Text('¿Olvidaste tu contraseña?'),
+                            SizedBox(height: 16),
+                            TextFormField(
+                              controller: _newPassController,
+                              decoration: InputDecoration(
+                                labelText: 'Nueva contraseña',
+                                border: OutlineInputBorder(),
+                              ),
+                              obscureText: true,
+                              validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
+                            ),
+                            SizedBox(height: 16),
+                            _loadingPass
+                                ? Center(child: CircularProgressIndicator())
+                                : ElevatedButton(
+                                    onPressed: () {
+                                      if (_formPassKey.currentState!.validate()) {
+                                        _cambiarPassword();
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.deepPurple,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    child: Text('Cambiar contraseña'),
+                                  ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                  // Bullet y Card para cambiar palabra clave
+                  Row(
+                    children: [
+                      Icon(Icons.password, color: Colors.teal),
+                      SizedBox(width: 8),
+                      Text('Cambiar palabra clave', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    ],
+                  ),
+                  Card(
+                    elevation: 4,
+                    margin: EdgeInsets.symmetric(vertical: 16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Form(
+                        key: _formClaveKey,
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: _claveActualController,
+                              decoration: InputDecoration(
+                                labelText: 'Palabra clave actual',
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
+                            ),
+                            SizedBox(height: 16),
+                            TextFormField(
+                              controller: _nuevaClaveController,
+                              decoration: InputDecoration(
+                                labelText: 'Nueva palabra clave',
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
+                            ),
+                            SizedBox(height: 16),
+                            _loadingClave
+                                ? Center(child: CircularProgressIndicator())
+                                : ElevatedButton(
+                                    onPressed: () {
+                                      if (_formClaveKey.currentState!.validate()) {
+                                        _cambiarPalabraClave();
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.teal,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    child: Text('Cambiar palabra clave'),
+                                  ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

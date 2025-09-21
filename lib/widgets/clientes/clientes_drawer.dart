@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mygym/views/cambiar_imagen_screen.dart';
 import 'package:mygym/views/gestion_contrase%C3%B1as.dart';
 import 'package:mygym/views/gestion_disciplinas.dart';
 import 'package:mygym/views/reportes_screen.dart';
@@ -32,6 +33,13 @@ class ClientesDrawer extends StatelessWidget {
                     title: Text('Gestionar disciplinas'),
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => GestionDisciplinasScreen()));
+                    },
+                  ),
+                  ListTile(
+                    leading: FaIcon(FontAwesomeIcons.image, color: Colors.black,),
+                    title: Text('Cambiar imagen de inicio'),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => CambiarImagenScreen()));
                     },
                   ),
                   ListTile(
