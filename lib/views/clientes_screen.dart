@@ -216,10 +216,19 @@ class _ClientesScreenState extends State<ClientesScreen> {
                                     .getNombresDisciplinasPorCliente(cliente.id!),
                                 builder: (context, snapshot) {
                                   final disciplinas = snapshot.data ?? [];
-                                  return ClienteCard(
-                                    cliente: cliente,
-                                    ultimoPago: ultimoPago,
-                                    disciplinas: disciplinas,
+                                  final screenWidth = MediaQuery.of(context).size.width;
+                                  print("ANCHO DE PANTALLA:" + screenWidth.toString());
+                                  return Center(
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth: screenWidth > 799 ? screenWidth * 0.7 : screenWidth * 0.95, // Limitar el ancho al 80% del ancho de la pantalla
+                                      ),
+                                      child: ClienteCard(
+                                        cliente: cliente,
+                                        ultimoPago: ultimoPago,
+                                        disciplinas: disciplinas,
+                                      ),
+                                    ),
                                   );
                                 },
                               );

@@ -82,178 +82,191 @@ class _InformacionScreenState extends State<InformacionScreen> {
                 padding: const EdgeInsets.only(left: 20.0, right: 20, top: 0,),
                 child: Consumer<ClienteProvider>(
                   builder: (context, clienteProvider, _) {
-                    return Card(
-                    elevation: 10,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          //----------------------------------------------------NOMBRE
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10.0),
-                            child: Text(
-                              "${cliente.nombres} ${cliente.apellidos}", 
-                              style: TextStyle(
-                                fontSize: 20, 
-                                fontWeight: FontWeight.bold
-                              ),
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          
-                          //------------------------------------------------ROW DE BOTONES
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                //---------------------------------------------------------BOTON WHATSAPP
-                                IconButton(
-                                  onPressed: () {
-                                    alertDialogWhatsApp(context, widget.ultimoPago.proximaFechaPago, cliente.telefono);
-                                  }, 
-                                  icon: Icon(FontAwesomeIcons.whatsapp, color: Colors.green[900]),
-                                  style: ButtonStyle(
-                                    backgroundColor: WidgetStateProperty.all<Color>(Colors.green[200]!),
-                                    shape: WidgetStateProperty.all<CircleBorder>(CircleBorder()),
-                                  ),
+                    final screenWidth = MediaQuery.of(context).size.width;
+
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: screenWidth > 799 ? screenWidth * 0.6 : screenWidth * 0.95, // Limitar el ancho al 80% del ancho de la pantalla
+                      ),
+                      child: Card(
+                      elevation: 10,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            //----------------------------------------------------NOMBRE
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: Text(
+                                "${cliente.nombres} ${cliente.apellidos}", 
+                                style: TextStyle(
+                                  fontSize: 20, 
+                                  fontWeight: FontWeight.bold
                                 ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
                             
-                                //---------------------------------------------------------BOTON AGREGAR PAGO
-                                IconButton(
-                                  onPressed: () {
-                                    showModalBottomSheet(
+                            //------------------------------------------------ROW DE BOTONES
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  //---------------------------------------------------------BOTON WHATSAPP
+                                  IconButton(
+                                    onPressed: () {
+                                      alertDialogWhatsApp(context, widget.ultimoPago.proximaFechaPago, cliente.telefono);
+                                    }, 
+                                    icon: Icon(FontAwesomeIcons.whatsapp, color: Colors.green[900]),
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty.all<Color>(Colors.green[200]!),
+                                      shape: WidgetStateProperty.all<CircleBorder>(CircleBorder()),
+                                    ),
+                                  ),
+                              
+                                  //---------------------------------------------------------BOTON AGREGAR PAGO
+                                  IconButton(
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                              isScrollControlled: true,
+                                              context: context, 
+                                              builder: (BuildContext context) {
+                                                return FormAgregarEditarPago(idCliente: cliente.id!, estaEditando: false,);
+                                              }
+                                            );
+                                    }, 
+                                    icon: Icon(FontAwesomeIcons.circleDollarToSlot, color: Colors.purple[900]),
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty.all<Color>(Colors.purple[200]!),
+                                      shape: WidgetStateProperty.all<CircleBorder>(CircleBorder()),
+                                    ),
+                                  ),
+                              
+                                  //---------------------------------------------------------BOTON EDITAR CLIENTE
+                                  IconButton(
+                                    onPressed: () {
+                                      showModalBottomSheet(
                                             isScrollControlled: true,
                                             context: context, 
                                             builder: (BuildContext context) {
-                                              return FormAgregarEditarPago(idCliente: cliente.id!, estaEditando: false,);
+                                              return DraggableScrollableSheet(
+                                                initialChildSize: 0.8, // 80% de la pantalla
+                                                minChildSize: 0.5,
+                                                maxChildSize: 0.95,
+                                                expand: false,
+                                                builder: (context, ScrollController) {
+                                                  return SingleChildScrollView(
+                                                    controller: ScrollController,
+                                                    child: FormAgregarEditarCliente(estaEditando: true, cliente: cliente,));
+                                                }
+                                              );
                                             }
                                           );
-                                  }, 
-                                  icon: Icon(FontAwesomeIcons.circleDollarToSlot, color: Colors.purple[900]),
-                                  style: ButtonStyle(
-                                    backgroundColor: WidgetStateProperty.all<Color>(Colors.purple[200]!),
-                                    shape: WidgetStateProperty.all<CircleBorder>(CircleBorder()),
-                                  ),
-                                ),
-                            
-                                //---------------------------------------------------------BOTON EDITAR CLIENTE
-                                IconButton(
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                          isScrollControlled: true,
-                                          context: context, 
-                                          builder: (BuildContext context) {
-                                            return DraggableScrollableSheet(
-                                              initialChildSize: 0.8, // 80% de la pantalla
-                                              minChildSize: 0.5,
-                                              maxChildSize: 0.95,
-                                              expand: false,
-                                              builder: (context, ScrollController) {
-                                                return SingleChildScrollView(
-                                                  controller: ScrollController,
-                                                  child: FormAgregarEditarCliente(estaEditando: true, cliente: cliente,));
+                                    }, 
+                                    icon: Icon(FontAwesomeIcons.userPen, color: Colors.blue[900]),
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty.all<Color>(Colors.blue[200]!),
+                                      shape: WidgetStateProperty.all<CircleBorder>(CircleBorder()),
+                                    ),
+                                  ), 
+                              
+                                  //---------------------------------------------------------BOTON ELIMINAR CLIENTE
+                                  IconButton(
+                                    onPressed: () async {
+                                              final resultado = await AlertDialogEliminarCliente(context, cliente.id!);
+                                              if(resultado == true) {
+                                                await clienteProvider.eliminarCliente(cliente.id!);
+                                                Navigator.of(context).pop();
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(content: Text("❌Cliente eliminado")),
+                                                ); 
                                               }
-                                            );
-                                          }
-                                        );
-                                  }, 
-                                  icon: Icon(FontAwesomeIcons.userPen, color: Colors.blue[900]),
-                                  style: ButtonStyle(
-                                    backgroundColor: WidgetStateProperty.all<Color>(Colors.blue[200]!),
-                                    shape: WidgetStateProperty.all<CircleBorder>(CircleBorder()),
-                                  ),
-                                ), 
-                            
-                                //---------------------------------------------------------BOTON ELIMINAR CLIENTE
-                                IconButton(
-                                  onPressed: () async {
-                                            final resultado = await AlertDialogEliminarCliente(context, cliente.id!);
-                                            if(resultado == true) {
-                                              await clienteProvider.eliminarCliente(cliente.id!);
-                                              Navigator.of(context).pop();
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text("❌Cliente eliminado")),
-                                              ); 
-                                            }
-                                          },
-                                  icon: Icon(FontAwesomeIcons.xmark, color: Colors.red[900]),
-                                  style: ButtonStyle(
-                                    backgroundColor: WidgetStateProperty.all<Color>(Colors.red[200]!),
-                                    shape: WidgetStateProperty.all<CircleBorder>(CircleBorder()),
-                                  ),
-                                ),                          
-                              ],
+                                            },
+                                    icon: Icon(FontAwesomeIcons.xmark, color: Colors.red[900]),
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty.all<Color>(Colors.red[200]!),
+                                      shape: WidgetStateProperty.all<CircleBorder>(CircleBorder()),
+                                    ),
+                                  ),                          
+                                ],
+                              ),
                             ),
-                          ),
-          
-                          Row(
-                            children: [                                  
-                              cliente.fotoPath != null && cliente.fotoPath!.isNotEmpty
-                              ? GestureDetector(
-                                onTap: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (_) => Dialog(
-                                      backgroundColor: Colors.black,
-                                      insetPadding: EdgeInsets.symmetric(horizontal: 60, vertical: 120), // Ajusta el tamaño aquí
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: Image.file(
-                                          File(cliente.fotoPath!),
-                                          fit: BoxFit.contain,
+                                
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [  
+                                //---------------------------------------------------------FOTO
+                                if(screenWidth > 799) SizedBox(width: 30), // Espacio a la izquierda en pantallas grandes                        
+                                cliente.fotoPath != null && cliente.fotoPath!.isNotEmpty
+                                ? GestureDetector(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (_) => Dialog(
+                                        backgroundColor: Colors.black,
+                                        insetPadding: EdgeInsets.symmetric(horizontal: 60, vertical: 120), // Ajusta el tamaño aquí
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(20),
+                                          child: Image.file(
+                                            File(cliente.fotoPath!),
+                                            fit: BoxFit.contain,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                },
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(50),
-                                  child: Image.file(
-                                    File(cliente.fotoPath!),
-                                    width: 120,
-                                    height: 120,
-                                    fit: BoxFit.cover,
-                                    ),
-                                ),
-                              )
-                              : const Icon(Icons.person, size: 120),
-                                      
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [                                                    
-                                    Text.rich(
-                                      TextSpan(
-                                        children: [                                      
-                                          TextSpan(text: "Disciplinas: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                                          TextSpan(text: disciplinasCliente.isNotEmpty
-                                              ? disciplinasCliente.join(", ") +"\n"
-                                              : "Sin disciplinas\n"),
-                                          TextSpan(text: "Teléfono: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                                          TextSpan(text: "${formatTelefono(cliente.telefono)}\n"),
-                                          TextSpan(text: "Tel. emergencia: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                                          TextSpan(text: "${formatTelefono(cliente.telefonoEmergencia)}\n"),
-                                          TextSpan(text: "Contacto emergencia: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                                          TextSpan(text: "${cliente.nombreEmergencia}\n"),
-                                          TextSpan(text: "Correo: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                                          TextSpan(text: "${cliente.correo}\n"),
-                                          TextSpan(text: "Observaciones: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                                          TextSpan(text: "${cliente.observaciones}"),
-                                        ],
+                                    );
+                                  },
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(50),
+                                    child: Image.file(
+                                      File(cliente.fotoPath!),
+                                      width: 120,
+                                      height: 120,
+                                      fit: BoxFit.cover,
                                       ),
-                                    )
-                                  ],
-                                ),
-                              )
-                            ],              
-                          ),
-                        ],
+                                  ),
+                                )
+                                : const Icon(Icons.person, size: 120),
+
+                                SizedBox(width: 30), // Espacio entre la foto y la información
+                                        
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [                                                    
+                                      Text.rich(
+                                        TextSpan(
+                                          children: [                                      
+                                            TextSpan(text: "Disciplinas: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                                            TextSpan(text: disciplinasCliente.isNotEmpty
+                                                ? disciplinasCliente.join(", ") +"\n"
+                                                : "Sin disciplinas\n"),
+                                            TextSpan(text: "Teléfono: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                                            TextSpan(text: "${formatTelefono(cliente.telefono)}\n"),
+                                            TextSpan(text: "Tel. emergencia: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                                            TextSpan(text: "${formatTelefono(cliente.telefonoEmergencia)}\n"),
+                                            TextSpan(text: "Contacto emergencia: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                                            TextSpan(text: "${cliente.nombreEmergencia}\n"),
+                                            TextSpan(text: "Correo: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                                            TextSpan(text: "${cliente.correo}\n"),
+                                            TextSpan(text: "Observaciones: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                                            TextSpan(text: "${cliente.observaciones}"),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                )
+                              ],              
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
+                                        ),
+                    );
                   },            
                 ),
               ),
