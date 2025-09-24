@@ -115,25 +115,25 @@ class _ClientesScreenState extends State<ClientesScreen> {
             );
           }, icon: const Icon(Icons.filter_alt_outlined)),
             //------------------------------Icono Ver Fotos Huerfanas
-            IconButton(
-              highlightColor: Colors.white38,
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => VerFotos()));
-              }, 
-              icon: Icon(Icons.photo_album)),
+            // IconButton(
+            //   highlightColor: Colors.white38,
+            //   onPressed: () {
+            //     Navigator.push(context, MaterialPageRoute(builder: (context) => VerFotos()));
+            //   }, 
+            //   icon: Icon(Icons.photo_album)),
       
             //------------------------------Icono Mandar Reportes
-            IconButton(
-              highlightColor: Colors.white38,
-              onPressed: () {
-                showModalBottomSheet(
-              context: context, 
-              builder: (BuildContext context) {
-                return FormFiltrosMaestro();
-              }
-            );
-              }, 
-              icon: FaIcon(FontAwesomeIcons.paperPlane), color: Colors.white,),
+            // IconButton(
+            //   highlightColor: Colors.white38,
+            //   onPressed: () {
+            //     showModalBottomSheet(
+            //   context: context, 
+            //   builder: (BuildContext context) {
+            //     return FormFiltrosMaestro();
+            //   }
+            // );
+            //   }, 
+            //   icon: FaIcon(FontAwesomeIcons.paperPlane), color: Colors.white,),
           ],
         ),
         body: Stack(
