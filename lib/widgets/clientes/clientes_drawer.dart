@@ -58,7 +58,7 @@ class ClientesDrawer extends StatelessWidget {
                     },
                   ),
                   ListTile(
-                    leading: FaIcon(FontAwesomeIcons.key, color: Colors.black,),
+                    leading: FaIcon(FontAwesomeIcons.solidCreditCard, color: Colors.black,),
                     title: Text('Suscripción'),
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => SuscripcionScreen()));

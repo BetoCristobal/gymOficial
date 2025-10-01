@@ -73,7 +73,12 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Suscripción')),
+      appBar: AppBar(
+        title: Text('Suscripción'),
+        backgroundColor: Colors.black,
+        iconTheme: IconThemeData(color: Colors.white),
+        titleTextStyle: TextStyle(fontSize: 23, color: Colors.white),
+      ),
       body: _loading
           ? Center(child: CircularProgressIndicator())
           : Column(
@@ -105,6 +110,10 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: ElevatedButton(
                     onPressed: _restaurarCompras,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                    ),
                     child: Text('Restaurar compras'),
                   ),
                 ),

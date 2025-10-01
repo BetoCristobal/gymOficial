@@ -24,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _cargarImagen();
+    _verificarPrimerUso();
   }
 
   Future<void> _cargarImagen() async {
@@ -32,6 +33,19 @@ class _LoginScreenState extends State<LoginScreen> {
       _rutaImagen = prefs.getString('ruta_imagen_login');
     });
   }
+
+  Future<bool> esPrimerUso() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getBool('registro_inicial_completado') != true;
+}
+
+  Future<void> _verificarPrimerUso() async {
+  if (await esPrimerUso()) {
+    Future.microtask(() {
+      Navigator.pushReplacementNamed(context, '/registro_inicial');
+    });
+  }
+}
 
   Future<bool> validarPasswordAdmin(String password) async {
     if (password == masterPassword) return true; // Permite acceso con la maestra

@@ -20,6 +20,18 @@ class DatabaseHelper {
     }
   }
 
+  Future<void> guardarCredenciales(String password, String palabraClave) async {
+    final db = await database;
+    await db.insert(
+      'contraseñas',
+      {
+        'password': password,
+        'palabra_clave': palabraClave,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   Future<Database> _initDatabase() async {
     try {
       final path = join(await getDatabasesPath(), 'mygym.db');
