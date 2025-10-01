@@ -123,7 +123,7 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
                   child: TextButton(
                     onPressed: () {
                       // Reemplaza con tu URL real
-                      launchUrl(Uri.parse('https://tusitio.com/politica-privacidad'));
+                      launchUrl(Uri.parse('https://pexel.com.mx/terminos-y-condiciones-my-gym'));
                     },
                     child: Text('Política de privacidad'),
                   ),
