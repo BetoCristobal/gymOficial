@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mygym/data/models/pago_model.dart';
 import 'package:mygym/providers/cliente_disciplina_provider.dart';
 import 'package:mygym/providers/cliente_provider.dart';
 import 'package:mygym/providers/disciplina_provider.dart';
 import 'package:mygym/providers/pago_provider.dart';
-import 'package:mygym/views/ver_fotos.dart';
 import 'package:mygym/widgets/clientes/barra_busqueda.dart';
 import 'package:mygym/widgets/clientes/cliente_card.dart';
 import 'package:mygym/widgets/clientes/clientes_drawer.dart';
 import 'package:mygym/widgets/clientes/form_agregar_editar_cliente.dart';
 import 'package:mygym/widgets/clientes/form_filtro_disciplina.dart';
-import 'package:mygym/widgets/clientes/form_filtros_maestro.dart';
 import 'package:mygym/widgets/clientes/my_toggle_buttons.dart';
 import 'package:provider/provider.dart';
 
@@ -50,6 +47,16 @@ class _ClientesScreenState extends State<ClientesScreen> {
 
   void _unfocusTextField() {
     _searchFocusNode.unfocus();
+  }
+
+  bool get _modoDemo {
+    final clienteProvider = Provider.of<ClienteProvider>(context, listen: false);
+    return clienteProvider.clientesFiltrados.length > 7;
+  }
+
+  void _mostrarSuscripcion() {
+    // Aquí navega a tu pantalla de suscripción
+    Navigator.pushNamed(context, '/suscripcion');
   }
 
   @override
@@ -185,59 +192,86 @@ class _ClientesScreenState extends State<ClientesScreen> {
 
                 //-------------------------------------------Lista clientes
                 Expanded(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      margin: EdgeInsets.only(top: 10),
-                      width: double.infinity,
-                      child: Consumer2<ClienteProvider, PagoProvider>(
-                        builder: (context, clienteProvider, pagoProvider, _) {                  
-                          
-                          if(clienteProvider.clientes.isEmpty) {
-                            return const Center(child: Text("No hay clientes registrados"),);
-                          }
-                    
-                          return ListView.builder(
-                            itemCount: clienteProvider.clientesFiltrados.length,
-                            itemBuilder: (context, index) {
-                              final cliente = clienteProvider.clientesFiltrados[index];
-                      
-                              final ultimoPago = pagoProvider.pagos.firstWhere(
-                                (pago) => pago.idCliente == cliente.id,
-                                orElse: () => PagoModel(
-                                  idCliente: 100000, 
-                                  montoPago: 0, 
-                                  fechaPago: DateTime(1900), 
-                                  proximaFechaPago: DateTime(1900), 
-                                  tipoPago: "ninguno"),
-                              );          
-                          
-                              return FutureBuilder<List<String>>(
-                                future: Provider.of<ClienteDisciplinaProvider>(context, listen: false)
-                                    .getNombresDisciplinasPorCliente(cliente.id!),
-                                builder: (context, snapshot) {
-                                  final disciplinas = snapshot.data ?? [];
-                                  final screenWidth = MediaQuery.of(context).size.width;
-                                  print("ANCHO DE PANTALLA:" + screenWidth.toString());
-                                  return Center(
-                                    child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        maxWidth: screenWidth > 799 ? screenWidth * 0.7 : screenWidth * 0.95, // Limitar el ancho al 80% del ancho de la pantalla
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    margin: EdgeInsets.only(top: 10),
+                    width: double.infinity,
+                    child: Consumer2<ClienteProvider, PagoProvider>(
+                      builder: (context, clienteProvider, pagoProvider, _) {
+                        if (clienteProvider.clientes.isEmpty) {
+                          return const Center(child: Text("No hay clientes registrados"),);
+                        }
+
+                        // Limitar a 7 clientes en modo demo
+                        final clientesDemo = clienteProvider.clientesFiltrados.length > 7
+                            ? clienteProvider.clientesFiltrados.take(7).toList()
+                            : clienteProvider.clientesFiltrados;
+
+                        return Stack(
+                          children: [
+                            ListView.builder(
+                              itemCount: clientesDemo.length,
+                              itemBuilder: (context, index) {
+                                final cliente = clientesDemo[index];
+                                final ultimoPago = pagoProvider.pagos.firstWhere(
+                                  (pago) => pago.idCliente == cliente.id,
+                                  orElse: () => PagoModel(
+                                    idCliente: 100000, 
+                                    montoPago: 0, 
+                                    fechaPago: DateTime(1900), 
+                                    proximaFechaPago: DateTime(1900), 
+                                    tipoPago: "ninguno"),
+                                );          
+                                return FutureBuilder<List<String>>(
+                                  future: Provider.of<ClienteDisciplinaProvider>(context, listen: false)
+                                      .getNombresDisciplinasPorCliente(cliente.id!),
+                                  builder: (context, snapshot) {
+                                    final disciplinas = snapshot.data ?? [];
+                                    final screenWidth = MediaQuery.of(context).size.width;
+                                    return Center(
+                                      child: ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          maxWidth: screenWidth > 799 ? screenWidth * 0.7 : screenWidth * 0.95,
+                                        ),
+                                        child: ClienteCard(
+                                          cliente: cliente,
+                                          ultimoPago: ultimoPago,
+                                          disciplinas: disciplinas,
+                                        ),
                                       ),
-                                      child: ClienteCard(
-                                        cliente: cliente,
-                                        ultimoPago: ultimoPago,
-                                        disciplinas: disciplinas,
+                                    );
+                                  },
+                                );
+                              }
+                            ),
+                            // Botón suscripción si hay más de 7 clientes
+                            if (clienteProvider.clientesFiltrados.length > 7)
+                              Positioned(
+                                bottom: 30,
+                                left: 0,
+                                right: 0,
+                                child: Center(
+                                  child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green[700],
+                                      foregroundColor: Colors.white,
+                                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
                                       ),
                                     ),
-                                  );
-                                },
-                              );
-                            }
-                          );            
-                        },
-                      ),
+                                    icon: Icon(Icons.lock_open, color: Colors.white,),
+                                    label: Text('Desbloquear app / Suscribirse'),
+                                    onPressed: _mostrarSuscripcion,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
                     ),
-                  )
+                  ),
+                ),
               ],
             ),
           ],

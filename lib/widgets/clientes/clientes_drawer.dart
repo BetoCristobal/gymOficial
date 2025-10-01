@@ -5,6 +5,7 @@ import 'package:mygym/views/gestion_contrase%C3%B1as.dart';
 import 'package:mygym/views/gestion_disciplinas.dart';
 import 'package:mygym/views/reportes_screen.dart';
 import 'package:mygym/views/respaldos_screen.dart';
+import 'package:mygym/views/suscripcion_screen.dart';
 
 class ClientesDrawer extends StatelessWidget {
   const ClientesDrawer({super.key});
@@ -54,6 +55,13 @@ class ClientesDrawer extends StatelessWidget {
                     title: Text('Gestionar contraseña'),
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => GestionContrasenasScreen()));
+                    },
+                  ),
+                  ListTile(
+                    leading: FaIcon(FontAwesomeIcons.key, color: Colors.black,),
+                    title: Text('Suscripción'),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => SuscripcionScreen()));
                     },
                   ),
                 ],

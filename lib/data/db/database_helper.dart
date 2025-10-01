@@ -95,7 +95,7 @@ class DatabaseHelper {
             '''
           );
           // Inserta una contraseña por defecto (puedes cambiarla luego)
-          await db.insert('contraseñas', {'password': '12345', 'palabra_clave': 'gimnasio'});
+          //await db.insert('contraseñas', {'password': '12345', 'palabra_clave': 'gimnasio'});
 
           print("✅ BASE DE DATOS CREADA CON EXITO");//--------------------
         },
