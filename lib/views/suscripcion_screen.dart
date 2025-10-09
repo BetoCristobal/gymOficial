@@ -108,6 +108,15 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
                     padding: EdgeInsets.all(16.0),
                     child: Text('✅ Suscripción activa', style: TextStyle(fontSize: 18, color: Colors.green)),
                   ),
+                if (!activa)
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    '❌ Suscripción no activa. Suscríbete para desbloquear la app y ver todos los clientes.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.redAccent),
+                  ),
+                ),
                 Expanded(
                   child: _products.isEmpty
                       ? const Center(child: Text('No hay productos disponibles'))
@@ -130,14 +139,14 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
                           },
                         ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton(
-                    onPressed: _restaurarCompras,
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white),
-                    child: const Text('Restaurar compras'),
-                  ),
-                ),
+                // Padding(
+                //   padding: const EdgeInsets.all(16.0),
+                //   child: ElevatedButton(
+                //     onPressed: _restaurarCompras,
+                //     style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white),
+                //     child: const Text('Restaurar compras'),
+                //   ),
+                // ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: TextButton(
