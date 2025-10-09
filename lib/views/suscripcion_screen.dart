@@ -96,11 +96,24 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
                           itemBuilder: (context, index) {
                             final product = _products[index];
                             return Card(
+                              color: Colors.deepPurple, // Fondo morado
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 3,
                               child: ListTile(
-                                title: Text(product.title),
-                                subtitle: Text(product.description),
-                                trailing: Text(product.price),
-                                onTap: () => _comprar(product),
+                                title: Text(
+                                  product.title,
+                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                                ),
+                                subtitle: Text(
+                                  product.description,
+                                  style: const TextStyle(color: Colors.white70),
+                                ),
+                                trailing: Text(
+                                  product.price,
+                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                ),
+                                // Si agregas íconos, ponles color blanco
+                                iconColor: Colors.white,
                               ),
                             );
                           },
