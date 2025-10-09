@@ -4,6 +4,7 @@ import 'package:mygym/providers/cliente_disciplina_provider.dart';
 import 'package:mygym/providers/cliente_provider.dart';
 import 'package:mygym/providers/disciplina_provider.dart';
 import 'package:mygym/providers/pago_provider.dart';
+import 'package:mygym/providers/suscripcion_provider.dart';
 import 'package:mygym/widgets/clientes/barra_busqueda.dart';
 import 'package:mygym/widgets/clientes/cliente_card.dart';
 import 'package:mygym/widgets/clientes/clientes_drawer.dart';
@@ -193,19 +194,21 @@ class _ClientesScreenState extends State<ClientesScreen> {
                 //-------------------------------------------Lista clientes
                 Expanded(
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    margin: EdgeInsets.only(top: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    margin: const EdgeInsets.only(top: 10),
                     width: double.infinity,
                     child: Consumer2<ClienteProvider, PagoProvider>(
                       builder: (context, clienteProvider, pagoProvider, _) {
+                        final suscripcionActiva = context.watch<SuscripcionProvider>().activa;
+
                         if (clienteProvider.clientes.isEmpty) {
-                          return const Center(child: Text("No hay clientes registrados"),);
+                          return const Center(child: Text("No hay clientes registrados"));
                         }
 
-                        // Limitar a 7 clientes en modo demo
-                        final clientesDemo = clienteProvider.clientesFiltrados.length > 7
-                            ? clienteProvider.clientesFiltrados.take(7).toList()
-                            : clienteProvider.clientesFiltrados;
+                        final listaCompleta = clienteProvider.clientesFiltrados;
+                        final clientesDemo = (!suscripcionActiva && listaCompleta.length > 7)
+                            ? listaCompleta.take(7).toList()
+                            : listaCompleta;
 
                         return Stack(
                           children: [
@@ -216,12 +219,13 @@ class _ClientesScreenState extends State<ClientesScreen> {
                                 final ultimoPago = pagoProvider.pagos.firstWhere(
                                   (pago) => pago.idCliente == cliente.id,
                                   orElse: () => PagoModel(
-                                    idCliente: 100000, 
-                                    montoPago: 0, 
-                                    fechaPago: DateTime(1900), 
-                                    proximaFechaPago: DateTime(1900), 
-                                    tipoPago: "ninguno"),
-                                );          
+                                    idCliente: 100000,
+                                    montoPago: 0,
+                                    fechaPago: DateTime(1900),
+                                    proximaFechaPago: DateTime(1900),
+                                    tipoPago: "ninguno",
+                                  ),
+                                );
                                 return FutureBuilder<List<String>>(
                                   future: Provider.of<ClienteDisciplinaProvider>(context, listen: false)
                                       .getNombresDisciplinasPorCliente(cliente.id!),
@@ -242,10 +246,9 @@ class _ClientesScreenState extends State<ClientesScreen> {
                                     );
                                   },
                                 );
-                              }
+                              },
                             ),
-                            // Botón suscripción si hay más de 7 clientes
-                            if (clienteProvider.clientesFiltrados.length > 7)
+                            if (!suscripcionActiva && listaCompleta.length > 7)
                               Positioned(
                                 bottom: 30,
                                 left: 0,
@@ -255,13 +258,13 @@ class _ClientesScreenState extends State<ClientesScreen> {
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.green[700],
                                       foregroundColor: Colors.white,
-                                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                     ),
-                                    icon: Icon(Icons.lock_open, color: Colors.white,),
-                                    label: Text('Desbloquear app / Suscribirse'),
+                                    icon: const Icon(Icons.lock_open, color: Colors.white),
+                                    label: const Text('Desbloquear app / Suscribirse'),
                                     onPressed: _mostrarSuscripcion,
                                   ),
                                 ),
