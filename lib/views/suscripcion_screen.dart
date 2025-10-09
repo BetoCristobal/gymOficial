@@ -114,6 +114,7 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
                                 ),
                                 // Si agregas íconos, ponles color blanco
                                 iconColor: Colors.white,
+                                onTap: () => _comprar(product),
                               ),
                             );
                           },
