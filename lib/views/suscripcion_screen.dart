@@ -28,6 +28,10 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
     _purchaseStream = _iap.purchaseStream;
     _loadProducts();
     _sub = _purchaseStream.listen(_onPurchaseUpdated, onDone: () => _sub?.cancel(), onError: (_) {});
+    // Refrescar estado al entrar
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SuscripcionProvider>().refrescarDesdeBilling();
+    });
   }
 
   @override
@@ -58,24 +62,27 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
   }
 
   void _onPurchaseUpdated(List<PurchaseDetails> purchases) {
-    for (var purchase in purchases) {
-      if (purchase.productID == _suscripcionId && purchase.status == PurchaseStatus.purchased) {
-        context.read<SuscripcionProvider>().setActiva(true);
-        if (purchase.pendingCompletePurchase) {
-          _iap.completePurchase(purchase);
-        }
+  for (var purchase in purchases) {
+    if (purchase.productID == _suscripcionId &&
+        (purchase.status == PurchaseStatus.purchased || purchase.status == PurchaseStatus.restored)) {
+      context.read<SuscripcionProvider>().setActiva(true);
+      if (purchase.pendingCompletePurchase) {
+        _iap.completePurchase(purchase);
+      }
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('✅ Suscripción activada')),
         );
-      } else if (purchase.status == PurchaseStatus.restored) {
-        context.read<SuscripcionProvider>().setActiva(true);
-      } else if (purchase.status == PurchaseStatus.error) {
+      }
+    } else if (purchase.status == PurchaseStatus.error) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('❌ Error en la compra')),
         );
       }
     }
   }
+}
 
   void _restaurarCompras() {
     _iap.restorePurchases();

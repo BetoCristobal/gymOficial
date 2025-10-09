@@ -1,7 +1,7 @@
 name: mygym
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.1.4+5
+version: 1.1.5+6
 
 environment:
   sdk: ^3.6.2
@@ -27,6 +27,7 @@ dependencies:
   shared_preferences: ^2.5.3
   flutter_launcher_icons: ^0.14.4
   in_app_purchase: ^3.2.3
+  in_app_purchase_android: ^0.4.0+3
 
 dev_dependencies:
   flutter_test:
