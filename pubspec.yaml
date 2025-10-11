@@ -28,6 +28,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   in_app_purchase: ^3.2.3
   in_app_purchase_android: ^0.4.0+3
+  introduction_screen: ^4.0.0
 
 dev_dependencies:
   flutter_test:

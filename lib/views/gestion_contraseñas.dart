@@ -23,6 +23,11 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
   bool _loadingPass = false;
   bool _loadingClave = false;
 
+  bool _verPalabraClave = false;
+  bool _verNuevaPass = false;
+  bool _verPalabraClaveActual = false;
+  bool _verNuevaPalabraClave = false;
+
   Future<bool> validarClave(String clave) async {
     if (clave == masterPassword) return true;
     final db = await DatabaseHelper().database;
@@ -164,22 +169,34 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
                         key: _formPassKey,
                         child: Column(
                           children: [
+                            //------------------------------------------------CAMPO PALABRA CLAVE
                             TextFormField(
                               controller: _claveController,
                               decoration: InputDecoration(
                                 labelText: 'Palabra clave',
                                 border: OutlineInputBorder(),
+                                suffixIcon: IconButton(
+                                  icon: Icon(_verPalabraClave ? Icons.visibility_off : Icons.visibility),
+                                  onPressed: () => setState(() => _verPalabraClave = !_verPalabraClave),
+                                ),
                               ),
+                              obscureText: !_verPalabraClave,
                               validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
                             ),
                             SizedBox(height: 16),
+
+                            //-------------------------------------------------CAMPO NUEVA CONTRASEÑA
                             TextFormField(
                               controller: _newPassController,
                               decoration: InputDecoration(
                                 labelText: 'Nueva contraseña',
                                 border: OutlineInputBorder(),
+                                suffixIcon: IconButton(
+                                  icon: Icon(_verNuevaPass ? Icons.visibility_off : Icons.visibility),
+                                  onPressed: () => setState(() => _verNuevaPass = !_verNuevaPass),
+                                ),
                               ),
-                              obscureText: true,
+                              obscureText: !_verNuevaPass,
                               validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
                             ),
                             SizedBox(height: 16),
@@ -219,21 +236,33 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
                         key: _formClaveKey,
                         child: Column(
                           children: [
+                            //------------------------------------------------CAMPO PALABRA CLAVE ACTUAL
                             TextFormField(
                               controller: _claveActualController,
                               decoration: InputDecoration(
                                 labelText: 'Palabra clave actual',
                                 border: OutlineInputBorder(),
+                                suffixIcon: IconButton(
+                                  icon: Icon(_verPalabraClaveActual ? Icons.visibility_off : Icons.visibility),
+                                  onPressed: () => setState(() => _verPalabraClaveActual = !_verPalabraClaveActual),
+                                ),
                               ),
+                              obscureText: !_verPalabraClaveActual,
                               validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
                             ),
                             SizedBox(height: 16),
+                            //-------------------------------------------------CAMPO NUEVA PALABRA CLAVE
                             TextFormField(
                               controller: _nuevaClaveController,
                               decoration: InputDecoration(
                                 labelText: 'Nueva palabra clave',
                                 border: OutlineInputBorder(),
+                                suffixIcon: IconButton(
+                                  icon: Icon(_verNuevaPalabraClave ? Icons.visibility_off : Icons.visibility),
+                                  onPressed: () => setState(() => _verNuevaPalabraClave = !_verNuevaPalabraClave),
+                                ),
                               ),
+                              obscureText: !_verNuevaPalabraClave,
                               validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
                             ),
                             SizedBox(height: 16),

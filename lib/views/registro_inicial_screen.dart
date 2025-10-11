@@ -17,6 +17,7 @@ class _RegistroInicialScreenState extends State<RegistroInicialScreen> {
 
   bool _mostrarInstrucciones = true;
   bool _verPass = false;
+  bool _verPalabraClave = false;
 
   @override
   void initState() {
@@ -173,10 +174,15 @@ class _RegistroInicialScreenState extends State<RegistroInicialScreen> {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _claveController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Palabra clave',
                           border: OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(_verPalabraClave ? Icons.visibility_off : Icons.visibility),
+                            onPressed: () => setState(() => _verPalabraClave = !_verPalabraClave),
+                          ),                          
                         ),
+                        obscureText: !_verPalabraClave,
                         validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
                       ),
                       const SizedBox(height: 24),

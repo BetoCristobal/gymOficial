@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:mygym/data/models/pago_model.dart';
@@ -78,6 +79,10 @@ final clienteProvider = Provider.of<ClienteProvider>(context, listen: false);
                   child: TextFormField(
                     controller: montoController,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(5), // Limita a 5 dígitos
+                    ],
                     decoration: InputDecoration(
                       labelText: "Monto \$\$\$",
                       border: OutlineInputBorder(

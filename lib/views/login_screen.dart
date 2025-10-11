@@ -15,6 +15,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   static const String masterPassword = 'pacc18'; // Cambia esto por seguridad
 
+  bool _verPass = false;
+
   String? _selectedUser;
   final TextEditingController _passController = TextEditingController();
   bool _loading = false;
@@ -230,18 +232,24 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
                           ),
+
+                          //-----------------------------------------------------------CAMPO CONTRASEÑA
                           if(_selectedUser == "administrador")
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
                               child: TextField(
                                 controller: _passController,
-                                obscureText: true,
+                                obscureText: !_verPass,
                                 decoration: InputDecoration(
                                   hintText: "Contraseña",
                                   hintStyle: TextStyle(color: Colors.white60),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(16),
                                     borderSide: BorderSide(color: Colors.white60),
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(_verPass ? Icons.visibility_off : Icons.visibility),
+                                    onPressed: () => setState(() => _verPass = !_verPass),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(16),
