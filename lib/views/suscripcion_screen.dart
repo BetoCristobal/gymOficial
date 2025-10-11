@@ -57,6 +57,13 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
   }
 
   void _comprar(ProductDetails product) {
+    final activa = context.read<SuscripcionProvider>().activa;
+    if (activa) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('✅Ya cuentas con una suscripción activa')),
+      );
+      return;
+    }
     final param = PurchaseParam(productDetails: product);
     _iap.buyNonConsumable(purchaseParam: param); // Para suscripciones también aplica
   }
