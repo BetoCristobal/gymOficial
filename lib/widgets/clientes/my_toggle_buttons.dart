@@ -4,7 +4,8 @@ import 'package:mygym/styles/text_styles.dart';
 import 'package:provider/provider.dart';
 
 class MyToggleButtons extends StatelessWidget {
-  const MyToggleButtons({super.key});
+
+  MyToggleButtons({super.key});
 
   @override
   Widget build(BuildContext context) {

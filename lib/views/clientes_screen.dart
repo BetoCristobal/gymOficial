@@ -90,7 +90,7 @@ class _ClientesScreenState extends State<ClientesScreen> with WidgetsBindingObse
     final totalClientes = context.select<ClienteProvider, int>(
       (p) => p.clientesFiltrados.length,
     );
-    final puedeAgregar = suscripcionActiva || totalClientes < 8;
+    final puedeAgregar = suscripcionActiva;
 
     return GestureDetector(
       onTap: () {
@@ -98,9 +98,9 @@ class _ClientesScreenState extends State<ClientesScreen> with WidgetsBindingObse
       },
       behavior: HitTestBehavior.opaque,
       child: Scaffold(
-        floatingActionButton: puedeAgregar ? FloatingActionButton(
-          backgroundColor: Colors.black,
-          onPressed: () {
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: puedeAgregar ? Colors.black : Colors.grey,
+          onPressed: puedeAgregar ? () {
             showModalBottomSheet(
               isScrollControlled: true,
               context: context, 
@@ -118,10 +118,11 @@ class _ClientesScreenState extends State<ClientesScreen> with WidgetsBindingObse
                 );
               }
             );
-          },
+          }
+          : null,
+          tooltip: puedeAgregar ? 'Agregar cliente' : 'Suscríbete para agregar más clientes',
           child: Icon(Icons.add, color: Colors.white,),
-        )
-        : null,
+        ),
 
         //----------------------------------------------------------Drawer solo para admin
         drawer: userType == "administrador" ? ClientesDrawer() : null,
@@ -275,49 +276,7 @@ class _ClientesScreenState extends State<ClientesScreen> with WidgetsBindingObse
                                   },
                                 );
                               },
-                            ),
-                            if (!suscripcionActiva && listaCompleta.length > 7)
-                              Positioned(
-                                bottom: 30,
-                                left: 0,
-                                right: 0,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black87,
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: const Text(
-                                          'Para agregar más clientes y visualizar todos los clientes, desbloquea la app suscribiéndote.',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Center(
-                                      child: ElevatedButton.icon(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.green[700],
-                                          foregroundColor: Colors.white,
-                                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                          ),
-                                        ),
-                                        icon: const Icon(Icons.lock_open, color: Colors.white),
-                                        label: const Text('Desbloquear app / Suscribirse'),
-                                        onPressed: _mostrarSuscripcion,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                            ),                            
                           ],
                         );
                       },
@@ -326,9 +285,51 @@ class _ClientesScreenState extends State<ClientesScreen> with WidgetsBindingObse
                 ),
               ],
             ),
+            // Overlay/Capa que cubre toda la pantalla cuando no está activa la suscripción
+            if (!suscripcionActiva)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.85),
+                  child: Center(
+                    child: Card(
+                      margin: const EdgeInsets.all(32),
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.lock, size: 80, color: Colors.deepPurple),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Suscripción requerida',
+                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Para disfrutar de todos los beneficios de My Gym como agregar clientes ilimitados, visualizar todos los registros y más funciones, necesitas una suscripción activa.',
+                              style: TextStyle(fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepPurple,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                              ),
+                              onPressed: _mostrarSuscripcion,
+                              child: const Text('Ver planes de suscripción'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
-        
       ),
     );
   }

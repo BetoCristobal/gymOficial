@@ -318,22 +318,31 @@ class _FormAgregarEditarClienteState extends State<FormAgregarEditarCliente> {
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 15),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text("Disciplinas", style: TextStyle(fontWeight: FontWeight.bold)),
-                      ...disciplinas.map((disciplina) => CheckboxListTile(
-                        title: Text(disciplina.nombre),
-                        value: disciplinasSeleccionadas.contains(disciplina.id),
-                        onChanged: (selected) {
-                          setState(() {
-                            if (selected == true) {
-                              disciplinasSeleccionadas.add(disciplina.id!);
-                            } else {
-                              disciplinasSeleccionadas.remove(disciplina.id);
-                            }
-                          });
-                        },
-                      )),
+                      if (disciplinas.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            "No hay disciplinas registradas",
+                            style: TextStyle(color: Colors.grey,),
+                          ),
+                        ),
+                      if (disciplinas.isNotEmpty)
+                        ...disciplinas.map((disciplina) => CheckboxListTile(
+                              title: Text(disciplina.nombre),
+                              value: disciplinasSeleccionadas.contains(disciplina.id),
+                              onChanged: (selected) {
+                                setState(() {
+                                  if (selected == true) {
+                                    disciplinasSeleccionadas.add(disciplina.id!);
+                                  } else {
+                                    disciplinasSeleccionadas.remove(disciplina.id);
+                                  }
+                                });
+                              },
+                            )),
                     ],
                   ),
                 ),            
