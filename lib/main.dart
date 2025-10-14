@@ -20,7 +20,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async  {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MainApp());
+  runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
@@ -40,13 +40,14 @@ class MainApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         initialRoute: "/",
+        restorationScopeId: "app",
         routes: {
-          "/": (context) => LaunchDecider(),
-          '/clientes': (context) => ClientesScreen(),
-          '/login': (context) => LoginScreen(),
-          '/gestion_contrasenas': (context) => GestionContrasenasScreen(),
-          '/suscripcion': (context) => SuscripcionScreen(),
-          '/registro_inicial': (context) => RegistroInicialScreen(),
+          "/": (context) => const LaunchDecider(),
+          '/clientes': (context) => const ClientesScreen(),
+          '/login': (context) => const LoginScreen(),
+          '/gestion_contrasenas': (context) => const GestionContrasenasScreen(),
+          '/suscripcion': (context) => const SuscripcionScreen(),
+          '/registro_inicial': (context) => const RegistroInicialScreen(),
         },
       ),
     );

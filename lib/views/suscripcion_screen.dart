@@ -28,7 +28,6 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
     _purchaseStream = _iap.purchaseStream;
     _loadProducts();
     _sub = _purchaseStream.listen(_onPurchaseUpdated, onDone: () => _sub?.cancel(), onError: (_) {});
-    // Refrescar estado al entrar
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SuscripcionProvider>().refrescarDesdeBilling();
     });
@@ -52,7 +51,6 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
       _products = response.productDetails;
       _loading = false;
     });
-    // Opcional: intenta restaurar para reflejar estado previo
     unawaited(_iap.restorePurchases());
   }
 
@@ -60,44 +58,53 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
     final activa = context.read<SuscripcionProvider>().activa;
     if (activa) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅Ya cuentas con una suscripción activa')),
+        const SnackBar(content: Text('✅ Ya cuentas con una suscripción activa')),
       );
       return;
     }
     final param = PurchaseParam(productDetails: product);
-    _iap.buyNonConsumable(purchaseParam: param); // Para suscripciones también aplica
+    _iap.buyNonConsumable(purchaseParam: param);
   }
 
   void _onPurchaseUpdated(List<PurchaseDetails> purchases) {
-  for (var purchase in purchases) {
-    if (purchase.productID == _suscripcionId &&
-        (purchase.status == PurchaseStatus.purchased || purchase.status == PurchaseStatus.restored)) {
-      context.read<SuscripcionProvider>().setActiva(true);
-      if (purchase.pendingCompletePurchase) {
-        _iap.completePurchase(purchase);
-      }
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ Suscripción activada')),
-        );
-      }
-    } else if (purchase.status == PurchaseStatus.error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('❌ Error en la compra')),
-        );
+    for (var purchase in purchases) {
+      if (purchase.productID == _suscripcionId &&
+          (purchase.status == PurchaseStatus.purchased || purchase.status == PurchaseStatus.restored)) {
+        context.read<SuscripcionProvider>().setActiva(true);
+        if (purchase.pendingCompletePurchase) {
+          _iap.completePurchase(purchase);
+        }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('✅ Suscripción activada')),
+          );
+        }
+      } else if (purchase.status == PurchaseStatus.error) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('❌ Error en la compra')),
+          );
+        }
       }
     }
   }
-}
 
   void _restaurarCompras() {
     _iap.restorePurchases();
   }
 
+  Future<void> _abrirPolitica() async {
+    final uri = Uri.parse('https://pexel.com.mx/terminos-y-condiciones-my-gym');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
   @override
   Widget build(BuildContext context) {
     final activa = context.watch<SuscripcionProvider>().activa;
+
+    final product = _products.isNotEmpty ? _products.first : null;
+    // Precio fijo si quieres forzarlo; si product != null puedes usar product.price
+    final displayPrice = product?.price ?? '\$180/mes';
 
     return Scaffold(
       appBar: AppBar(
@@ -108,60 +115,87 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                if (activa)
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text('✅ Suscripción activa', style: TextStyle(fontSize: 18, color: Colors.green)),
-                  ),
-                if (!activa)
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    '❌ Suscripción no activa. Suscríbete para desbloquear la app y ver todos los clientes.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.redAccent),
-                  ),
-                ),
-                Expanded(
-                  child: _products.isEmpty
-                      ? const Center(child: Text('No hay productos disponibles'))
-                      : ListView.builder(
-                          itemCount: _products.length,
-                          itemBuilder: (context, index) {
-                            final product = _products[index];
-                            return Card(
-                              color: Colors.deepPurple,
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  if (activa)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text('✅ Suscripción activa', style: TextStyle(fontSize: 18, color: Colors.green)),
+                    )
+                  else
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        '❌ Suscripción no activa. Suscríbete para desbloquear la app y ver todas las funciones.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16, color: Colors.redAccent),
+                      ),
+                    ),
+                  const SizedBox(height: 16),
+                  // Botón principal (estado según suscripción)
+                  SizedBox(
+                    width: double.infinity,
+                    child: activa
+                        ? ElevatedButton(
+                            onPressed: null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              elevation: 3,
-                              child: ListTile(
-                                title: Text(product.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                                subtitle: Text(product.description, style: const TextStyle(color: Colors.white70)),
-                                trailing: Text(product.price, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                iconColor: Colors.white,
-                                onTap: () => _comprar(product),
-                              ),
-                            );
-                          },
-                        ),
-                ),
-                // Padding(
-                //   padding: const EdgeInsets.all(16.0),
-                //   child: ElevatedButton(
-                //     onPressed: _restaurarCompras,
-                //     style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white),
-                //     child: const Text('Restaurar compras'),
-                //   ),
-                // ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: TextButton(
-                    onPressed: () => launchUrl(Uri.parse('https://pexel.com.mx/terminos-y-condiciones-my-gym')),
-                    child: const Text('Política de privacidad'),
+                            ),
+                            child: const Text('Ya estás suscrito', style: TextStyle(fontSize: 16)),
+                          )
+                        : ElevatedButton(
+                            onPressed: product != null ? () => _comprar(product) : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepPurple, // morado
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: Text('Suscribirse por $displayPrice', style: const TextStyle(fontSize: 16)),
+                          ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 24),
+                  // Información adicional o lista de producto (opcional)
+                  // Expanded(
+                  //   child: product == null
+                  //       ? const Center(child: Text('No hay productos disponibles', textAlign: TextAlign.center))
+                  //       : Column(
+                  //           crossAxisAlignment: CrossAxisAlignment.start,
+                  //           children: [
+                  //             const SizedBox(height: 12),
+                  //             Text(product.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  //             const SizedBox(height: 8),
+                  //             Text(product.description),
+                  //             const SizedBox(height: 8),
+                  //             Text('Precio en tienda: ${product.price}', style: const TextStyle(fontWeight: FontWeight.w600)),
+                  //           ],
+                  //         ),
+                  // ),
+
+                  Spacer(),
+
+                  // if (!activa)
+                  //   Padding(
+                  //     padding: const EdgeInsets.only(bottom: 8.0),
+                  //     child: TextButton(
+                  //       onPressed: _restaurarCompras,
+                  //       child: const Text('Restaurar compras'),
+                  //     ),
+                  //   ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: TextButton(
+                      onPressed: _abrirPolitica,
+                      child: const Text('Política de privacidad'),
+                    ),
+                  ),
+                ],
+              ),
             ),
     );
   }
