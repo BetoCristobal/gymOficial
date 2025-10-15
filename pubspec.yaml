@@ -1,7 +1,7 @@
 name: mygym
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.1.7+8
+version: 1.1.8+9
 
 environment:
   sdk: ^3.6.2
