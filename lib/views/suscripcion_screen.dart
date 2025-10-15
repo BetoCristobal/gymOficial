@@ -76,13 +76,19 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
         }
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('✅ Suscripción activada')),
+            const SnackBar(
+              content: Text('✅ Suscripción activada'),
+              duration: const Duration(seconds: 2),              
+            ),
           );
         }
       } else if (purchase.status == PurchaseStatus.error) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('❌ Error en la compra')),
+            const SnackBar(
+              content: Text('❌ Error en la compra'),
+              duration: Duration(seconds: 2),
+            ),
           );
         }
       }
@@ -146,7 +152,7 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
-                            child: const Text('Ya estás suscrito', style: TextStyle(fontSize: 16)),
+                            child: const Text('Ya estás suscrito, \$180/mes', style: TextStyle(fontSize: 16)),
                           )
                         : ElevatedButton(
                             onPressed: product != null ? () => _comprar(product) : null,
@@ -176,6 +182,98 @@ class _SuscripcionScreenState extends State<SuscripcionScreen> {
                   //           ],
                   //         ),
                   // ),
+
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          ' Beneficios de la suscripción',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.menu, color: Colors.deepPurple),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Acceso al menú de administrador: configura disciplinas, precios y gestiona tu negocio.',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.person_add, color: Colors.deepPurple),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Registra clientes ilimitados: sin restricciones en la cantidad de registros.',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.search, color: Colors.deepPurple),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Busca y filtra clientes: encuentra rápidamente a cualquier cliente por nombre, estado o disciplina.',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.filter_list, color: Colors.deepPurple),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Filtra por disciplinas: organiza y visualiza tus clientes por cada disciplina que ofreces.',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.picture_as_pdf, color: Colors.deepPurple),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Reportes y PDF: genera y descarga reportes detallados de tus clientes y pagos en formato PDF.',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
 
                   Spacer(),
 

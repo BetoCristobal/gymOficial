@@ -109,7 +109,10 @@ class _GestionDisciplinasScreenState extends State<GestionDisciplinasScreen> {
                                         if(resultado == true) {
                                           await disciplinaProvider.eliminarDisciplina(disciplina.id!);
                                           ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text("❌Disciplina eliminada")),
+                                            SnackBar(
+                                              content: Text("❌Disciplina eliminada"),
+                                              duration: Duration(seconds: 2),
+                                            ),
                                           ); 
                                         }
                             },

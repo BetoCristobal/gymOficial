@@ -28,6 +28,8 @@ class _ClientesScreenState extends State<ClientesScreen> with WidgetsBindingObse
 
   final FocusNode _searchFocusNode = FocusNode();
 
+  bool _showOverlay = true;
+
   @override
   void initState() {
     super.initState();
@@ -69,11 +71,6 @@ class _ClientesScreenState extends State<ClientesScreen> with WidgetsBindingObse
     _searchFocusNode.unfocus();
   }
 
-  bool get _modoDemo {
-    final clienteProvider = Provider.of<ClienteProvider>(context, listen: false);
-    return clienteProvider.clientesFiltrados.length > 7;
-  }
-
   void _mostrarSuscripcion() async {
     // Espera el regreso y refresca el estado
     await Navigator.pushNamed(context, '/suscripcion');
@@ -86,93 +83,130 @@ class _ClientesScreenState extends State<ClientesScreen> with WidgetsBindingObse
     final String? userType = ModalRoute.of(context)!.settings.arguments as String?;
     final suscripcionActiva = context.watch<SuscripcionProvider>().activa;
 
-    // Toma el total de clientes para decidir si mostrar el FAB
-    final totalClientes = context.select<ClienteProvider, int>(
-      (p) => p.clientesFiltrados.length,
+    // Get total records (not filtered)
+    final totalRegistros = context.select<ClienteProvider, int>(
+      (p) => p.clientes.length,
     );
-    final puedeAgregar = suscripcionActiva;
+
+    // Check if features should be disabled
+    final debeDesactivarFunciones = !suscripcionActiva && totalRegistros > 9;
 
     return GestureDetector(
-      onTap: () {
-        _unfocusTextField();
-      },
+      onTap: _unfocusTextField,
       behavior: HitTestBehavior.opaque,
       child: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: puedeAgregar ? Colors.black : Colors.grey,
-          onPressed: puedeAgregar ? () {
-            showModalBottomSheet(
-              isScrollControlled: true,
-              context: context, 
-              builder: (BuildContext context) {
-                return DraggableScrollableSheet(
-                  initialChildSize: 0.8, // 80% de la pantalla
-                  minChildSize: 0.5,
-                  maxChildSize: 0.95,
-                  expand: false,
-                  builder: (context, ScrollController) {
-                    return SingleChildScrollView(
-                      controller: ScrollController,
-                      child: FormAgregarEditarCliente(estaEditando: false,));
-                  }
-                );
-              }
-            );
-          }
+        // Drawer only if features enabled and admin
+        drawer: (!debeDesactivarFunciones && userType == "administrador") 
+          ? ClientesDrawer() 
           : null,
-          tooltip: puedeAgregar ? 'Agregar cliente' : 'Suscríbete para agregar más clientes',
-          child: Icon(Icons.add, color: Colors.white,),
-        ),
 
-        //----------------------------------------------------------Drawer solo para admin
-        drawer: userType == "administrador" ? ClientesDrawer() : null,
+        floatingActionButton: FloatingActionButton(
+  backgroundColor: Colors.black,
+  onPressed: () {
+    final totalRegistros = context.read<ClienteProvider>().clientes.length;
+    final suscripcionActiva = context.read<SuscripcionProvider>().activa;
+
+    if (!suscripcionActiva && totalRegistros >= 10) {
+      // Mostrar overlay de suscripción
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.lock, size: 80, color: Colors.deepPurple),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Límite de clientes alcanzado',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Has alcanzado el límite de 10 clientes. Suscríbete para agregar clientes ilimitados y acceder a todas las funciones.',
+                    style: TextStyle(fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context); // Cierra el diálogo
+                      Navigator.pushNamed(context, '/suscripcion');
+                    },
+                    child: const Text('Ver planes de suscripción'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    } else {
+      // Mostrar formulario de agregar cliente
+      showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        builder: (BuildContext context) {
+          return DraggableScrollableSheet(
+            initialChildSize: 0.8,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            expand: false,
+            builder: (context, scrollController) {
+              return SingleChildScrollView(
+                controller: scrollController,
+                child: const FormAgregarEditarCliente(estaEditando: false),
+              );
+            },
+          );
+        },
+      );
+    }
+  },
+  tooltip: 'Agregar cliente',
+  child: const Icon(Icons.add, color: Colors.white),
+),
 
         appBar: AppBar(
-          iconTheme: IconThemeData(color: Colors.white),
+          iconTheme: const IconThemeData(color: Colors.white),
           title: Consumer<ClienteProvider>(
             builder: (context, clienteProvider, _) {
               final total = clienteProvider.clientesFiltrados.length;
-              return Text("Clientes ($total)", style: TextStyle(color: Colors.white),);
+              return Text("Clientes ($total)", 
+                style: const TextStyle(color: Colors.white)
+              );
             }
           ),
           backgroundColor: Colors.black,
-          titleTextStyle: TextStyle(fontSize: 23, color: Colors.white),
+          titleTextStyle: const TextStyle(fontSize: 23, color: Colors.white),
           actions: [
-            // ICONO APLICAR FILTROS
-          IconButton(
-            highlightColor: Colors.white38,
-            onPressed: () {
-            showModalBottomSheet(
-              context: context, 
-              builder: (BuildContext context) {
-                return FormFiltroDisciplina(
-                  
-                );
-              }
-            );
-          }, icon: const Icon(Icons.filter_alt_outlined)),
-            //------------------------------Icono Ver Fotos Huerfanas
-            // IconButton(
-            //   highlightColor: Colors.white38,
-            //   onPressed: () {
-            //     Navigator.push(context, MaterialPageRoute(builder: (context) => VerFotos()));
-            //   }, 
-            //   icon: Icon(Icons.photo_album)),
-      
-            //------------------------------Icono Mandar Reportes
-            // IconButton(
-            //   highlightColor: Colors.white38,
-            //   onPressed: () {
-            //     showModalBottomSheet(
-            //   context: context, 
-            //   builder: (BuildContext context) {
-            //     return FormFiltrosMaestro();
-            //   }
-            // );
-            //   }, 
-            //   icon: FaIcon(FontAwesomeIcons.paperPlane), color: Colors.white,),
+            // Only show filter if features not disabled
+            if (!debeDesactivarFunciones)
+              IconButton(
+                highlightColor: Colors.white38,
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) => const FormFiltroDisciplina(),
+                  );
+                },
+                icon: const Icon(Icons.filter_alt_outlined)
+              ),
           ],
         ),
+
         body: Stack(
           children: [
             Container(
@@ -235,16 +269,17 @@ class _ClientesScreenState extends State<ClientesScreen> with WidgetsBindingObse
                         }
 
                         final listaCompleta = clienteProvider.clientesFiltrados;
-                        final clientesDemo = (!suscripcionActiva && listaCompleta.length > 7)
-                            ? listaCompleta.take(7).toList()
+                        // Modificado: mostrar máximo 10 registros si no hay suscripción
+                        final clientesLimitados = !suscripcionActiva 
+                            ? listaCompleta.take(10).toList()
                             : listaCompleta;
 
                         return Stack(
                           children: [
                             ListView.builder(
-                              itemCount: clientesDemo.length,
+                              itemCount: clientesLimitados.length,
                               itemBuilder: (context, index) {
-                                final cliente = clientesDemo[index];
+                                final cliente = clientesLimitados[index];
                                 final ultimoPago = pagoProvider.pagos.firstWhere(
                                   (pago) => pago.idCliente == cliente.id,
                                   orElse: () => PagoModel(
@@ -286,43 +321,57 @@ class _ClientesScreenState extends State<ClientesScreen> with WidgetsBindingObse
               ],
             ),
             // Overlay/Capa que cubre toda la pantalla cuando no está activa la suscripción
-            if (!suscripcionActiva)
+            if (!suscripcionActiva && _showOverlay)
               Positioned.fill(
                 child: Container(
                   color: Colors.black.withOpacity(0.85),
                   child: Center(
                     child: Card(
                       margin: const EdgeInsets.all(32),
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.lock, size: 80, color: Colors.deepPurple),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Suscripción requerida',
-                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                              textAlign: TextAlign.center,
+                      child: Stack(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.lock, size: 80, color: Colors.deepPurple),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Suscripción requerida',
+                                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Para disfrutar de todos los beneficios de My Gym como agregar clientes ilimitados, visualizar todos los registros y más funciones, necesitas una suscripción activa.',
+                                  style: TextStyle(fontSize: 16),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 24),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.deepPurple,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                                  ),
+                                  onPressed: _mostrarSuscripcion,
+                                  child: const Text('Ver planes de suscripción'),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Para disfrutar de todos los beneficios de My Gym como agregar clientes ilimitados, visualizar todos los registros y más funciones, necesitas una suscripción activa.',
-                              style: TextStyle(fontSize: 16),
-                              textAlign: TextAlign.center,
+                          ),
+                          // Add close button
+                          Positioned(
+                            right: 8,
+                            top: 8,
+                            child: IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () => setState(() => _showOverlay = false),
+                              color: Colors.grey,
                             ),
-                            const SizedBox(height: 24),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.deepPurple,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                              ),
-                              onPressed: _mostrarSuscripcion,
-                              child: const Text('Ver planes de suscripción'),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
