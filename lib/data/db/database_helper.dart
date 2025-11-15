@@ -26,7 +26,7 @@ class DatabaseHelper {
 
       return await openDatabase(
         path,
-        version: 1,
+        version: 2,
         onConfigure: (db) async {
           //HABILITAN LLAVES FORANEAS 
           await db.execute("PRAGMA foreign_keys = ON;");
@@ -98,6 +98,43 @@ class DatabaseHelper {
           await db.insert('contraseñas', {'password': '12345', 'palabra_clave': 'gimnasio'});
 
           print("✅ BASE DE DATOS CREADA CON EXITO");//--------------------
+        },
+
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion < 2) {
+            print("🔄 Ejecutando migración V1 → V2...");
+
+            // 1. Agregar columna 'activa' en disciplinas
+            await db.execute("""
+              ALTER TABLE disciplinas ADD COLUMN activa INTEGER DEFAULT 1;
+            """);
+            print("✔ Columna 'activa' agregada a disciplinas");
+
+            // 2. Agregar columna 'id_disciplina' en pagos
+            await db.execute("""
+              ALTER TABLE pagos ADD COLUMN id_disciplina INTEGER;
+            """);
+            print("✔ Columna 'id_disciplina' agregada a pagos");
+
+            // 3. Insertar disciplina por defecto "General"
+            int idGeneral = await db.insert("disciplinas", {
+              "nombre": "General",
+              "descripcion": "Disciplina asignada por defecto",
+              "activa": 1
+            });
+
+            print("✔ Disciplina 'General' creada con id = $idGeneral");
+
+            // 4. Asignar disciplina General a todos los pagos anteriores
+            await db.update(
+              "pagos",
+              {"id_disciplina": idGeneral},
+              where: "id_disciplina IS NULL"
+            );
+
+            print("✔ Todos los pagos antiguos ahora apuntan a id_disciplina = $idGeneral");
+            print("🎉 Migración a versión 2 completada con éxito.");
+          }
         },
       );
     }
