@@ -70,13 +70,32 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
       );
     }
 
+    // Controladores y valores para cada disciplina
+    final Map<String, TextEditingController> montoControllers = {};
+    final Map<String, String?> tipoPagoSeleccionado = {};
+    final List<String> opcionesPago = ['Efectivo', 'Tarjeta', 'Transferencia'];
+
+    // Inicializa controladores si es necesario
+    for (var disciplina in widget.disciplinas) {
+      montoControllers.putIfAbsent(disciplina, () => TextEditingController());
+      tipoPagoSeleccionado.putIfAbsent(disciplina, () => null);
+    }
+
+    double calcularTotal() {
+      double total = 0.0;
+      for (var disciplina in widget.disciplinas) {
+        final text = montoControllers[disciplina]?.text ?? '';
+        total += double.tryParse(text) ?? 0.0;
+      }
+      return total;
+    }
+
     return IntrinsicHeight(
       child: Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Form(
           key: formKeyPagos,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+          child: SingleChildScrollView(
             child: Column(
               children: [
                 Padding(
@@ -85,66 +104,123 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
                   ? "Realizar pago:" 
                   : "Actualizar último pago:", style: TextStyles.tituloShowModal, ),
                 ),
-            
-                //CAMPO MONTO
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: 15),
-                  child: TextFormField(
-                    controller: montoController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: "Monto \$\$\$",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.grey, width: 1),
+
+                ...widget.disciplinas.map((disciplina) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 15),
+                      Text(disciplina, style: TextStyle(fontWeight: FontWeight.bold)),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: montoControllers[disciplina],
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                labelText: "Monto \$\$\$",
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(color: Colors.grey, width: 1),
+                                ),
+                              ),
+                              onChanged: (_) => setState(() {}),
+                              validator: (value) =>
+                                  value == null || value.isEmpty ? "Ingrese monto" : null,
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: const Color.fromARGB(255, 0, 132, 255),
+                            ),
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: DropdownButton<String>(
+                              value: tipoPagoSeleccionado[disciplina],
+                              hint: Text("Tipo de pago", style: TextStyle(color: Colors.white)),
+                              items: opcionesPago.map((String option) {
+                                return DropdownMenuItem<String>(
+                                  value: option,
+                                  child: Text(option, style: TextStyle(color: Colors.black)),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  tipoPagoSeleccionado[disciplina] = newValue;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    validator: (value) =>
-                      value == null || value.isEmpty ? "Ingrese monto" : null,
-                  ),
+                    ],
+                  );
+                }).toList(),
+                SizedBox(height: 15),
+                Text(
+                  "Total: \$${calcularTotal().toStringAsFixed(2)}",
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
+                //CAMPO MONTO
+                // Container(
+                //   margin: EdgeInsets.symmetric(vertical: 15),
+                //   child: TextFormField(
+                //     controller: montoController,
+                //     keyboardType: TextInputType.number,
+                //     decoration: InputDecoration(
+                //       labelText: "Monto \$\$\$",
+                //       border: OutlineInputBorder(
+                //         borderRadius: BorderRadius.circular(10),
+                //         borderSide: BorderSide(color: Colors.grey, width: 1),
+                //       ),
+                //     ),
+                //     validator: (value) =>
+                //       value == null || value.isEmpty ? "Ingrese monto" : null,
+                //   ),
+                // ),
             
                 //LISTA DROPDOWN TIPO PAGO
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: 10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: const Color.fromARGB(255, 0, 132, 255),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 10),
+                // Container(
+                //   margin: EdgeInsets.symmetric(vertical: 10),
+                //   child: Container(
+                //     decoration: BoxDecoration(
+                //       borderRadius: BorderRadius.circular(10),
+                //       color: const Color.fromARGB(255, 0, 132, 255),
+                //     ),
+                //     padding: EdgeInsets.symmetric(horizontal: 10),
                     
-                    child: DropdownButton2<String>(
-                      isExpanded: true,
-                      underline: SizedBox(), // Elimina la línea debajo del texto
-                      dropdownStyleData: DropdownStyleData(
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 0, 132, 255),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      iconStyleData: IconStyleData(
-                        icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-                      ),
-                      hint: const Text(
-                        "Elige una forma de pago",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      value: valorDropDownButton,
-                      items: options.map((String option) {
-                        return DropdownMenuItem<String>(
-                          value: option,
-                          child: Text(option, style: TextStyle(color: Colors.white)),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          valorDropDownButton = newValue;
-                        });
-                      },
-                    ),
-                  ),
-                ),
+                //     child: DropdownButton2<String>(
+                //       isExpanded: true,
+                //       underline: SizedBox(), // Elimina la línea debajo del texto
+                //       dropdownStyleData: DropdownStyleData(
+                //         decoration: BoxDecoration(
+                //           color: const Color.fromARGB(255, 0, 132, 255),
+                //           borderRadius: BorderRadius.circular(10),
+                //         ),
+                //       ),
+                //       iconStyleData: IconStyleData(
+                //         icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                //       ),
+                //       hint: const Text(
+                //         "Elige una forma de pago",
+                //         style: TextStyle(color: Colors.white),
+                //       ),
+                //       value: valorDropDownButton,
+                //       items: options.map((String option) {
+                //         return DropdownMenuItem<String>(
+                //           value: option,
+                //           child: Text(option, style: TextStyle(color: Colors.white)),
+                //         );
+                //       }).toList(),
+                //       onChanged: (String? newValue) {
+                //         setState(() {
+                //           valorDropDownButton = newValue;
+                //         });
+                //       },
+                //     ),
+                //   ),
+                // ),
             
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 10),
@@ -205,7 +281,7 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
                     ],
                   ),
                 ),
-
+            
                 Container(
                   width: double.infinity,
                   margin: EdgeInsets.only(top: 10, bottom: 20),
@@ -216,7 +292,7 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
                       backgroundColor: const Color.fromARGB(255, 29, 173, 33)
                     ),
                     onPressed: () async {                                            
-
+            
                       if(formKeyPagos.currentState!.validate() && fechaPago != null && fechaProximoPago != null && valorDropDownButton != null) {
                         final pagoProvider = Provider.of<PagoProvider>(context, listen: false);
                         int diasRestantes = calcularDiasRestantes(fechaProximoPago!);
