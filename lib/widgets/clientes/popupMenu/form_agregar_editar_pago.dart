@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:mygym/data/models/pago_model.dart';
@@ -24,6 +25,10 @@ class FormAgregarEditarPago extends StatefulWidget {
 }
 
 class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
+
+  // Controladores y valores para cada disciplina
+    final Map<String, TextEditingController> montoControllers = {};
+    final Map<String, String?> tipoPagoSeleccionado = {};
 
   final GlobalKey<FormState> formKeyPagos = GlobalKey<FormState>();
   TextEditingController montoController = TextEditingController();
@@ -70,9 +75,7 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
       );
     }
 
-    // Controladores y valores para cada disciplina
-    final Map<String, TextEditingController> montoControllers = {};
-    final Map<String, String?> tipoPagoSeleccionado = {};
+    
     final List<String> opcionesPago = ['Efectivo', 'Tarjeta', 'Transferencia'];
 
     // Inicializa controladores si es necesario
@@ -92,7 +95,7 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
 
     return IntrinsicHeight(
       child: Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding: EdgeInsets.only(left: 10, right: 10, bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Form(
           key: formKeyPagos,
           child: SingleChildScrollView(
@@ -110,49 +113,79 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: 15),
-                      Text(disciplina, style: TextStyle(fontWeight: FontWeight.bold)),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: montoControllers[disciplina],
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: "Monto \$\$\$",
-                                border: OutlineInputBorder(
+                      Container(                        
+                        padding: EdgeInsets.only(bottom: 5),
+                        child: Text("$disciplina:", style: TextStyle(fontWeight: FontWeight.bold))),
+                      Container(
+                        width: double.infinity,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: montoControllers[disciplina],
+                                keyboardType: TextInputType.number,
+                                style: TextStyle(color: Colors.black),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly, // Solo números
+                                  LengthLimitingTextInputFormatter(4),    // Máximo 4 dígitos
+                                ],
+                                decoration: InputDecoration(
+                                  labelText: "Monto \$\$\$",
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(color: Colors.grey, width: 1),
+                                  ),
+                                ),
+                                onChanged: (_) => setState(() {}),
+                                validator: (value) =>
+                                    value == null || value.isEmpty ? "Ingrese monto" : null,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Flexible(
+                              child: Container(
+                                decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(color: Colors.grey, width: 1),
+                                  color: const Color.fromARGB(255, 0, 132, 255),
+                                ),
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: DropdownButton2<String>(
+                                  isExpanded: true,
+                                  underline: SizedBox(),
+                                  dropdownStyleData: DropdownStyleData(
+                                    decoration: BoxDecoration(
+                                      color: const Color.fromARGB(255, 0, 132, 255),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  buttonStyleData: ButtonStyleData(
+                                    decoration: BoxDecoration(
+                                      color: const Color.fromARGB(255, 0, 132, 255),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    padding: EdgeInsets.symmetric(horizontal: 0),
+                                  ),
+                                  iconStyleData: IconStyleData(
+                                    icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                                  ),
+                                  value: tipoPagoSeleccionado[disciplina],
+                                  hint: Text("Tipo de pago", style: TextStyle(color: Colors.white)),
+                                  items: opcionesPago.map((String option) {
+                                    return DropdownMenuItem<String>(
+                                      value: option,
+                                      child: Text(option, style: TextStyle(color: const Color.fromARGB(255, 255, 255, 255))),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      tipoPagoSeleccionado[disciplina] = newValue;
+                                    });
+                                  },
                                 ),
                               ),
-                              onChanged: (_) => setState(() {}),
-                              validator: (value) =>
-                                  value == null || value.isEmpty ? "Ingrese monto" : null,
                             ),
-                          ),
-                          SizedBox(width: 10),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: const Color.fromARGB(255, 0, 132, 255),
-                            ),
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: DropdownButton<String>(
-                              value: tipoPagoSeleccionado[disciplina],
-                              hint: Text("Tipo de pago", style: TextStyle(color: Colors.white)),
-                              items: opcionesPago.map((String option) {
-                                return DropdownMenuItem<String>(
-                                  value: option,
-                                  child: Text(option, style: TextStyle(color: Colors.black)),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  tipoPagoSeleccionado[disciplina] = newValue;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   );
