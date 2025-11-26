@@ -42,7 +42,8 @@ class PagoProvider extends ChangeNotifier {
         montoPago: monto, 
         fechaPago: fechaPago, 
         proximaFechaPago: proximaFechaPago, 
-        tipoPago: tipoPago
+        tipoPago: tipoPago, 
+        idDisciplina: 1 // Temporalmente se asigna 1 como idDisciplina------------------
       );
       await pagoRepo.insertPago(nuevoPago);
       print("✅Se agrego nuevo pago: $nuevoPago");

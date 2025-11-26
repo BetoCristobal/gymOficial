@@ -4,6 +4,12 @@ import 'package:mygym/data/models/disciplina_model.dart';
 class DisciplinaRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
+  Future<List<DisciplinaModel>> getDisciplinas() async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query('disciplinas');
+    return maps.map((map) => DisciplinaModel.fromMap(map)).toList();
+  }
+
   Future<void> insertDisciplina(DisciplinaModel disciplina) async {
     final db = await _dbHelper.database;
     await db.insert('disciplinas', disciplina.toMap());

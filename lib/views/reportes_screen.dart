@@ -128,12 +128,13 @@ class _ReportesScreenState extends State<ReportesScreen> {
                   child: DataTable2(
                     columnSpacing: 10,
                     horizontalMargin: 12,
-                    minWidth: 450,
+                    minWidth: 530,
                     columns: [
                       //DataColumn(label: Text("#")),
                       DataColumn2(label: Text("Nombre cliente:")),
                       DataColumn2(label: Text("Fecha pago:"), ),
                       DataColumn2(label: Text("Monto:"), size: ColumnSize.S),
+                      DataColumn2(label: Text("Disciplina:"), size: ColumnSize.S),
                       DataColumn2(label: Text("Tipo:"),),
                     ], 
                     rows: reportesProvider.reportesMostrar.asMap().entries.map((entry) {
@@ -153,6 +154,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
                           DataCell(Text(reporte.nombreCliente, maxLines: 2,  overflow: TextOverflow.ellipsis,)),
                           DataCell(Text(txtFechaPago)),
                           DataCell(Text("\$${reporte.montoPago}")),
+                          DataCell(Text(reporte.nombreDisciplina!)),
                           DataCell(Text(reporte.tipoPago)),
                         ]
                       );

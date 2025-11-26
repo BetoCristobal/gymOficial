@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mygym/data/models/cliente_model.dart';
+import 'package:mygym/data/models/disciplina_model.dart';
 import 'package:mygym/data/models/reporte_pago_model.dart';
 import 'package:mygym/data/repositories/cliente_repository.dart';
+import 'package:mygym/data/repositories/disciplina_repository.dart';
 import 'package:mygym/data/repositories/pago_repository.dart';
 
 class ReportesProvider extends ChangeNotifier{
   final PagoRepository pagoRepo;
   final ClienteRepository clienteRepo;
+  final DisciplinaRepository disciplinaRepo;
 
-  ReportesProvider(this.pagoRepo, this.clienteRepo);
+  ReportesProvider(this.pagoRepo, this.clienteRepo, this.disciplinaRepo);
 
   List<ReportePagoModel> _reportes = [];
   double _sumaTotal = 0;
@@ -56,6 +59,7 @@ class ReportesProvider extends ChangeNotifier{
     try {
       final pagos = await pagoRepo.getPagosTodosOrdenadosById();
       final clientes = await clienteRepo.getClientes();
+      final disciplinas = await disciplinaRepo.getDisciplinas();
       
       _reportes = pagos.map((pago) {
         final cliente = clientes.firstWhere(
@@ -67,11 +71,22 @@ class ReportesProvider extends ChangeNotifier{
             estatus: ""
           ),
         );
+
+        final disciplina = disciplinas.firstWhere(
+          (d) => d.id == pago.idDisciplina,
+          orElse: () => DisciplinaModel(
+            id: -1,
+            nombre: "desconocida",
+            descripcion: "",
+          ),
+        );
+
         return ReportePagoModel(
           nombreCliente: "${cliente.nombres} ${cliente.apellidos}", 
           fechaPago: pago.fechaPago, 
           montoPago: pago.montoPago, 
-          tipoPago: pago.tipoPago
+          tipoPago: pago.tipoPago,
+          nombreDisciplina: disciplina.nombre,
         );
       }).toList();
 

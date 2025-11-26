@@ -27,7 +27,7 @@ class MainApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => ClienteProvider(ClienteRepository())),
         ChangeNotifierProvider(create: (_) => PagoProvider(PagoRepository())),
-        ChangeNotifierProvider(create: (_) => ReportesProvider(PagoRepository(), ClienteRepository())),
+        ChangeNotifierProvider(create: (_) => ReportesProvider(PagoRepository(), ClienteRepository(), DisciplinaRepository())),
         ChangeNotifierProvider(create: (_) => DisciplinaProvider(DisciplinaRepository())),
         ChangeNotifierProvider(create: (_) => ClienteDisciplinaProvider(ClienteDisciplinaRepository())),
       ],

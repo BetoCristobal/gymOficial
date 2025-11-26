@@ -35,11 +35,9 @@ class ClienteDisciplinaRepository {
   }
 
   Future<void> eliminarPorCliente(int idCliente) async {
-  final db = await _dbHelper.database;
-  await db.delete('cliente_disciplinas', where: 'id_cliente = ?', whereArgs: [idCliente]);
-}
-
-
+    final db = await _dbHelper.database;
+    await db.delete('cliente_disciplinas', where: 'id_cliente = ?', whereArgs: [idCliente]);
+  }
 
   Future<List<String>> getNombresDisciplinasPorCliente(int idCliente) async {
     final db = await _dbHelper.database;
