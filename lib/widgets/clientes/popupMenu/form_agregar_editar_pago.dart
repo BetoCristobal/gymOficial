@@ -15,8 +15,9 @@ class FormAgregarEditarPago extends StatefulWidget {
   final int idCliente;
   final PagoModel? pagoEditar;
   final bool estaEditando;
+  final List<String> disciplinas;
 
-  const FormAgregarEditarPago({super.key, required this.idCliente, required this.estaEditando, this.pagoEditar});
+  const FormAgregarEditarPago({super.key, required this.idCliente, required this.estaEditando, this.pagoEditar, required this.disciplinas,});
 
   @override
   State<FormAgregarEditarPago> createState() => _FormAgregarEditarPagoState();
@@ -53,8 +54,21 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
   @override
   Widget build(BuildContext context) {
 
-final clienteProvider = Provider.of<ClienteProvider>(context, listen: false);
+    final clienteProvider = Provider.of<ClienteProvider>(context, listen: false);
 
+    // Verifica si la lista de disciplinas es null o vacía
+    if (widget.disciplinas.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Text(
+            "Este cliente no tiene disciplinas asignadas.",
+            style: TextStyle(fontSize: 16, color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
 
     return IntrinsicHeight(
       child: Padding(

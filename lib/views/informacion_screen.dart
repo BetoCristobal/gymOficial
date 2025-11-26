@@ -134,7 +134,11 @@ class _InformacionScreenState extends State<InformacionScreen> {
                                               isScrollControlled: true,
                                               context: context, 
                                               builder: (BuildContext context) {
-                                                return FormAgregarEditarPago(idCliente: cliente.id!, estaEditando: false,);
+                                                return FormAgregarEditarPago(
+                                                  idCliente: cliente.id!, 
+                                                  estaEditando: false, 
+                                                  disciplinas: disciplinasCliente,
+                                                );
                                               }
                                             );
                                     }, 
@@ -325,6 +329,7 @@ class _InformacionScreenState extends State<InformacionScreen> {
                                     idCliente: cliente.id!, 
                                     estaEditando: true, 
                                     pagoEditar: reporte,
+                                    disciplinas: disciplinasCliente,
                                   );
                                 }
                               );

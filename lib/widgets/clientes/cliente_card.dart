@@ -96,7 +96,10 @@ class ClienteCard extends StatelessWidget {
                               isScrollControlled: true,
                               context: context, 
                               builder: (BuildContext context) {
-                                return FormAgregarEditarPago(idCliente: cliente.id!, estaEditando: false,);
+                                return FormAgregarEditarPago(
+                                  idCliente: cliente.id!, 
+                                  estaEditando: false,
+                                  disciplinas: disciplinas,);
                               }
                             );
                             break;                  
