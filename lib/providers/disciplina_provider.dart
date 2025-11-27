@@ -8,6 +8,9 @@ class DisciplinaProvider extends ChangeNotifier {
   List<DisciplinaModel> _disciplinas = [];
   List<DisciplinaModel> get disciplinas => _disciplinas;
 
+  List<DisciplinaModel> get disciplinasActivas =>
+    _disciplinas.where((d) => d.activa == 1).toList();
+
   DisciplinaProvider(this.disciplinaRepo);
 
   Future<void> cargarDisciplinas() async {

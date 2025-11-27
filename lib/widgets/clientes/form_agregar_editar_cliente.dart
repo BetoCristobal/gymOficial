@@ -89,7 +89,7 @@ class _FormAgregarEditarClienteState extends State<FormAgregarEditarCliente> {
   @override
   Widget build(BuildContext context) {
 
-    final disciplinas = Provider.of<DisciplinaProvider>(context).disciplinas;
+    final disciplinas = Provider.of<DisciplinaProvider>(context).disciplinasActivas;
 
     return IntrinsicHeight(
       child: Padding(
