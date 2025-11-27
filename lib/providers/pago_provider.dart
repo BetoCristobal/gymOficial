@@ -35,14 +35,22 @@ class PagoProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> agregarPago(int idCliente, double monto, DateTime fechaPago, DateTime proximaFechaPago, String tipoPago) async {
+  Future<void> agregarPago(
+    int idCliente, 
+    double monto, 
+    DateTime fechaPago, 
+    DateTime proximaFechaPago, 
+    String tipoPago,
+    String? nombreDisciplina
+  ) async {
     try{
       final nuevoPago = PagoModel(
         idCliente: idCliente, 
         montoPago: monto, 
         fechaPago: fechaPago, 
         proximaFechaPago: proximaFechaPago, 
-        tipoPago: tipoPago, 
+        tipoPago: tipoPago,
+        nombreDisciplina: nombreDisciplina 
       );
       await pagoRepo.insertPago(nuevoPago);
       print("✅Se agrego nuevo pago: $nuevoPago");

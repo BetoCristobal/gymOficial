@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:mygym/data/models/disciplina_model.dart';
 import 'package:mygym/data/models/pago_model.dart';
+import 'package:mygym/data/repositories/disciplina_repository.dart';
 import 'package:mygym/providers/cliente_provider.dart';
 import 'package:mygym/providers/pago_provider.dart';
 import 'package:mygym/styles/text_styles.dart';
@@ -26,12 +28,14 @@ class FormAgregarEditarPago extends StatefulWidget {
 
 class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
 
+  List<DisciplinaModel> todasDisciplinas = [];
+
   // Controladores y valores para cada disciplina
-    final Map<String, TextEditingController> montoControllers = {};
-    final Map<String, String?> tipoPagoSeleccionado = {};
+  final Map<String, TextEditingController> montoControllers = {};
+  final Map<String, String?> tipoPagoSeleccionado = {};
 
   final GlobalKey<FormState> formKeyPagos = GlobalKey<FormState>();
-  TextEditingController montoController = TextEditingController();
+  //TextEditingController montoController = TextEditingController();//-------------------QUITAR
 
   DateTime? fechaPago;
   String txtFechaPago = "Seleccionar"; 
@@ -45,7 +49,8 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
   void initState() {
     super.initState();
     if(widget.estaEditando == true) {
-      montoController = TextEditingController(text: widget.pagoEditar!.montoPago.toString());
+      //montoController = TextEditingController(text: widget.pagoEditar!.montoPago.toString());
+      cargarDisciplinas();
 
       valorDropDownButton = widget.pagoEditar!.tipoPago;
 
@@ -56,6 +61,13 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
       txtFechaProximoPago = DateFormat("dd-MM-yyyy").format(fechaProximoPago!);
     }
   }
+
+  Future<void> cargarDisciplinas() async {
+    final repo = DisciplinaRepository();
+    todasDisciplinas = await repo.getDisciplinas();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -324,47 +336,80 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 29, 173, 33)
                     ),
-                    onPressed: () async {                                            
-            
-                      if(formKeyPagos.currentState!.validate() && fechaPago != null && fechaProximoPago != null && valorDropDownButton != null) {
-                        final pagoProvider = Provider.of<PagoProvider>(context, listen: false);
-                        int diasRestantes = calcularDiasRestantes(fechaProximoPago!);
-                        String estatus = asignarEstatus(diasRestantes, widget.idCliente);
-                      
-                        if(widget.estaEditando == false) {
-                          await pagoProvider.agregarPago(
-                            widget.idCliente, 
-                            double.parse(montoController.text), 
-                            fechaPago!, 
-                            fechaProximoPago!, 
-                            valorDropDownButton!
-                          );
-                          await clienteProvider.actualizarEstatusCliente(widget.idCliente, estatus);
-                          Navigator.pop(context);
-                        } else if(widget.estaEditando == true) {
-                          await pagoProvider.actualizarPago(
-                            widget.pagoEditar!.id!, 
-                            widget.pagoEditar!.idCliente, 
-                            double.parse(montoController.text), 
-                            fechaPago!, 
-                            fechaProximoPago!, 
-                            valorDropDownButton!
-                          );
-                          await clienteProvider.actualizarEstatusCliente(widget.idCliente, estatus);
-                          Navigator.pop(context);
-                        }
-                      } else {
-                        showDialog(
-                          context: context, 
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text("Advertencia:"),
-                              content: const Text("Debe ingresar monto, tipo de pago y fechas.")
-                            );
-                          }
-                        );
-                      }
-                    }, 
+                    onPressed: () async {
+                      // Validar que todos los montos y tipos de pago estén completos
+                      bool faltanMontos = widget.disciplinas.any((nombreDisciplina) =>
+                        montoControllers[nombreDisciplina]?.text == null ||
+                        montoControllers[nombreDisciplina]!.text.isEmpty
+                      );
+                      bool faltanTipos = widget.disciplinas.any((nombreDisciplina) =>
+                        tipoPagoSeleccionado[nombreDisciplina] == null
+                      );
+
+                      // if (formKeyPagos.currentState!.validate() &&
+                      //     fechaPago != null &&
+                      //     fechaProximoPago != null &&
+                      //     !faltanMontos &&
+                      //     !faltanTipos) {
+                      //   final pagoProvider = Provider.of<PagoProvider>(context, listen: false);
+                      //   final clienteProvider = Provider.of<ClienteProvider>(context, listen: false);
+
+                      //   int diasRestantes = calcularDiasRestantes(fechaProximoPago!);
+                      //   String estatus = asignarEstatus(diasRestantes, widget.idCliente);
+
+                      //   if (!widget.estaEditando) {
+                      //     // Guardar un pago por cada disciplina
+                      //     for (var nombreDisciplina in widget.disciplinas) {
+                      //       final controller = montoControllers[nombreDisciplina];
+                      //       final monto = double.tryParse(controller?.text ?? '0') ?? 0.0;
+                      //       final tipoPago = tipoPagoSeleccionado[nombreDisciplina];
+
+                      //       // Buscar el idDisciplina por nombre
+                      //       final disciplina = todasDisciplinas.firstWhere(
+                      //         (d) => d.nombre == nombreDisciplina,
+                      //       );
+                      //       if (disciplina == null) continue; // Si no encuentra la disciplina, omite
+
+                      //       await pagoProvider.agregarPago(
+                      //         widget.idCliente,
+                      //         monto,
+                      //         fechaPago!,
+                      //         fechaProximoPago!,
+                      //         tipoPago!,
+                      //         disciplina.id,
+                      //       );
+                      //     }
+                      //     await clienteProvider.actualizarEstatusCliente(widget.idCliente, estatus);
+                      //     Navigator.pop(context);
+                      //   } else {
+                      //     // Editar solo el pago actual (usa tu lógica de edición)
+                      //     final controller = montoControllers[widget.disciplinas.first];
+                      //     final monto = double.tryParse(controller?.text ?? '0') ?? 0.0;
+                      //     final tipoPago = tipoPagoSeleccionado[widget.disciplinas.first];
+
+                      //     await pagoProvider.actualizarPago(
+                      //       widget.pagoEditar!.id!,
+                      //       widget.pagoEditar!.idCliente,
+                      //       monto,
+                      //       fechaPago!,
+                      //       fechaProximoPago!,
+                      //       tipoPago!,
+                      //     );
+                      //     await clienteProvider.actualizarEstatusCliente(widget.idCliente, estatus);
+                      //     Navigator.pop(context);
+                      //   }
+                      // } else {
+                      //   showDialog(
+                      //     context: context,
+                      //     builder: (BuildContext context) {
+                      //       return AlertDialog(
+                      //         title: const Text("Advertencia:"),
+                      //         content: const Text("Debe ingresar monto, tipo de pago y fechas para cada disciplina."),
+                      //       );
+                      //     }
+                      //   );
+                      // }
+                    },
                     //child: Text(widget.estaEditando == false ? "Guardar pago" : "Actualizar pago", style: TextStyle(color: Colors.white),)
                   ),
                 ),

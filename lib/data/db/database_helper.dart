@@ -100,7 +100,14 @@ class DatabaseHelper {
           print("✅ BASE DE DATOS CREADA CON EXITO");//--------------------
         },
 
+        // -------------------------------------------------------------
+        // 🔥🔥🔥 MIGRACIONES
+        // -------------------------------------------------------------
+
         onUpgrade: (db, oldVersion, newVersion) async {
+          // -----------------------------------------------------------
+          // 👉👉👉 Migración V1 → V2
+          // -----------------------------------------------------------
           if (oldVersion < 2) {
             print("🔄 Ejecutando migración V1 → V2...");
 
@@ -110,9 +117,9 @@ class DatabaseHelper {
             """);
             print("✔ Columna 'activa' agregada a disciplinas");
 
-            // 2. Agregar columna 'id_disciplina' en pagos
+            // 2. Agregar columna 'nombre_disciplina' en pagos
             await db.execute("""
-              ALTER TABLE pagos ADD COLUMN id_disciplina INTEGER;
+              ALTER TABLE pagos ADD COLUMN nombre_disciplina TEXT;
             """);
             print("✔ Columna 'id_disciplina' agregada a pagos");
 
@@ -128,11 +135,11 @@ class DatabaseHelper {
             // 4. Asignar disciplina General a todos los pagos anteriores
             await db.update(
               "pagos",
-              {"id_disciplina": idGeneral},
-              where: "id_disciplina IS NULL"
+              {"nombre_disciplina": "General"},
+              where: "nombre_disciplina IS NULL"
             );
 
-            print("✔ Todos los pagos antiguos ahora apuntan a id_disciplina = $idGeneral");
+            print("✔ Todos los pagos antiguos ahora apuntan a nombre_disciplina = General");
             print("🎉 Migración a versión 2 completada con éxito.");
           }
         },

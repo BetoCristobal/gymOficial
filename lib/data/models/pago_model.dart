@@ -5,7 +5,7 @@ class PagoModel {
   DateTime fechaPago;
   DateTime proximaFechaPago;
   String tipoPago;
-  int? idDisciplina;
+  String? nombreDisciplina;
 
   PagoModel({
     this.id,
@@ -14,7 +14,7 @@ class PagoModel {
     required this.fechaPago,
     required this.proximaFechaPago,
     required this.tipoPago,
-    this.idDisciplina
+    this.nombreDisciplina
   });
 
   // Pago -> Map PARA GUARDAR EN BD
@@ -26,7 +26,7 @@ class PagoModel {
       'fecha_pago': fechaPago.toIso8601String(),
       'proxima_fecha_pago': proximaFechaPago.toIso8601String(),
       'tipo_pago': tipoPago,
-      'id_disciplina': idDisciplina
+      'nombreDisciplina': nombreDisciplina
     };
   }
 
@@ -39,7 +39,7 @@ class PagoModel {
       fechaPago: DateTime.parse(map['fecha_pago']), 
       proximaFechaPago: DateTime.parse(map['proxima_fecha_pago']), 
       tipoPago: map['tipo_pago'],
-      idDisciplina: map['id_disciplina']
+      nombreDisciplina: map['nombreDisciplina']
     );
   }
 }

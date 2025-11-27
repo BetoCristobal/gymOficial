@@ -72,21 +72,12 @@ class ReportesProvider extends ChangeNotifier{
           ),
         );
 
-        final disciplina = disciplinas.firstWhere(
-          (d) => d.id == pago.idDisciplina,
-          orElse: () => DisciplinaModel(
-            id: -1,
-            nombre: "desconocida",
-            descripcion: "",
-          ),
-        );
-
         return ReportePagoModel(
           nombreCliente: "${cliente.nombres} ${cliente.apellidos}", 
           fechaPago: pago.fechaPago, 
           montoPago: pago.montoPago, 
           tipoPago: pago.tipoPago,
-          nombreDisciplina: disciplina.nombre,
+          nombreDisciplina: pago.nombreDisciplina ?? "Desconocida",
         );
       }).toList();
 
