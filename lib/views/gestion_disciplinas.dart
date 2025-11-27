@@ -102,18 +102,32 @@ class _GestionDisciplinasScreenState extends State<GestionDisciplinasScreen> {
                           subtitle: disciplina.descripcion != null && disciplina.descripcion!.isNotEmpty
                               ? Text(disciplina.descripcion!)
                               : null,
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () async {
-                              final resultado = await AlertDialogEliminarDisciplina(context, disciplina.id!);
-                                        if(resultado == true) {
-                                          await disciplinaProvider.eliminarDisciplina(disciplina.id!);
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text("❌Disciplina eliminada")),
-                                          ); 
-                                        }
-                            },
-                          ),
+                          trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Switch(
+                              value: disciplina.activa == 1,
+                              onChanged: (value) async {
+                                await Provider.of<DisciplinaProvider>(context, listen: false)
+                                    .actualizarEstadoDisciplina(disciplina.id!, value ? 1 : 0);
+                              },
+                              activeColor: Colors.green,
+                              inactiveThumbColor: Colors.red,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () async {
+                                final resultado = await AlertDialogEliminarDisciplina(context, disciplina.id!);
+                                if (resultado == true) {
+                                  await disciplinaProvider.eliminarDisciplina(disciplina.id!);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("❌Disciplina eliminada")),
+                                  );
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                         ),
                       );
                     },

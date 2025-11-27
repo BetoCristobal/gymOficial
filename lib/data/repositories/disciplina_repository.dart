@@ -25,4 +25,14 @@ class DisciplinaRepository {
     final db = await _dbHelper.database;
     await db.delete('disciplinas', where: 'id = ?', whereArgs: [id]);
   }
+
+  Future<void> actualizarEstadoDisciplina(int id, int activa) async {
+    final db = await _dbHelper.database;
+    await db.update(
+      'disciplinas',
+      {'activa': activa},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 }

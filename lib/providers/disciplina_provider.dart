@@ -20,6 +20,11 @@ class DisciplinaProvider extends ChangeNotifier {
     await cargarDisciplinas();
   }
 
+  Future<void> actualizarEstadoDisciplina(int id, int activa) async {
+    await disciplinaRepo.actualizarEstadoDisciplina(id, activa);
+    await cargarDisciplinas();
+  }
+
   Future<void> eliminarDisciplina(int id) async {
     await disciplinaRepo.deleteDisciplina(id);
     await cargarDisciplinas();
