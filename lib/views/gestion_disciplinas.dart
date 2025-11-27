@@ -108,6 +108,38 @@ class _GestionDisciplinasScreenState extends State<GestionDisciplinasScreen> {
                             Switch(
                               value: disciplina.activa == 1,
                               onChanged: (value) async {
+                                if (!value) {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text("Advertencia"),
+                                      content: Text("Al desactivar una disciplina se desactivara en cada cliente que la tenga asignada. ¿Desea continuar?"),
+                                      actions: [                                        
+                                        TextButton(
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.green,
+                                          ),
+                                          child: Text(
+                                            "Confirmar",
+                                            style: TextStyle(color: Colors.white),
+                                          ),
+                                          onPressed: () => Navigator.of(context).pop(true),
+                                        ),
+                                        TextButton(
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                          ),
+                                          child: Text(
+                                            "Cancelar",
+                                            style: TextStyle(color: Colors.white),
+                                          ),
+                                          onPressed: () => Navigator.of(context).pop(false),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirm != true) return;
+                                }
                                 await Provider.of<DisciplinaProvider>(context, listen: false)
                                     .actualizarEstadoDisciplina(disciplina.id!, value ? 1 : 0);
                               },
