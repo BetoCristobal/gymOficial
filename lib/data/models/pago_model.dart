@@ -26,7 +26,7 @@ class PagoModel {
       'fecha_pago': fechaPago.toIso8601String(),
       'proxima_fecha_pago': proximaFechaPago.toIso8601String(),
       'tipo_pago': tipoPago,
-      'nombreDisciplina': nombreDisciplina
+      'nombre_disciplina': nombreDisciplina
     };
   }
 
@@ -39,7 +39,7 @@ class PagoModel {
       fechaPago: DateTime.parse(map['fecha_pago']), 
       proximaFechaPago: DateTime.parse(map['proxima_fecha_pago']), 
       tipoPago: map['tipo_pago'],
-      nombreDisciplina: map['nombreDisciplina']
+      nombreDisciplina: map['nombre_disciplina']
     );
   }
 }

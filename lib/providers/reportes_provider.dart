@@ -59,7 +59,6 @@ class ReportesProvider extends ChangeNotifier{
     try {
       final pagos = await pagoRepo.getPagosTodosOrdenadosById();
       final clientes = await clienteRepo.getClientes();
-      final disciplinas = await disciplinaRepo.getDisciplinas();
       
       _reportes = pagos.map((pago) {
         final cliente = clientes.firstWhere(
