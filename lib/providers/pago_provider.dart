@@ -61,7 +61,14 @@ class PagoProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> actualizarPago(int id, int idCliente, double monto, DateTime fechaPago, DateTime proximaFechaPago, String tipoPago) async {
+  Future<void> actualizarPago(
+    int id, int idCliente, 
+    double monto, 
+    DateTime fechaPago, 
+    DateTime proximaFechaPago, 
+    String tipoPago,
+    String? nombreDisciplina
+  ) async {
     try{
       final pagoActualizado = PagoModel(
         id: id,
@@ -69,7 +76,8 @@ class PagoProvider extends ChangeNotifier {
         montoPago: monto, 
         fechaPago: fechaPago, 
         proximaFechaPago: proximaFechaPago, 
-        tipoPago: tipoPago
+        tipoPago: tipoPago,
+        nombreDisciplina: nombreDisciplina
       );
       await pagoRepo.updatePago(pagoActualizado);
       notifyListeners();

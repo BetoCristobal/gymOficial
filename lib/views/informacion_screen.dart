@@ -291,11 +291,12 @@ class _InformacionScreenState extends State<InformacionScreen> {
                     return DataTable2(
                     columnSpacing: 10,
                     horizontalMargin: 10,
-                    minWidth: 450,
+                    minWidth: 550,
                     columns: [
                       DataColumn2(label: Text("Fecha \nde pago:"),),
                       DataColumn2(label: Text("Próximo \npago:"),),
                       DataColumn2(label: Text("Monto:"),),
+                      DataColumn2(label: Text("Disciplina:"),),
                       DataColumn2(label: Text("Tipo:"),),
                       DataColumn2(label: Text("Editar:"),),
                       DataColumn2(label: Text("Eliminar:"),),
@@ -317,6 +318,7 @@ class _InformacionScreenState extends State<InformacionScreen> {
                           DataCell(Text(DateFormat("dd-MM-yy").format(reporte.fechaPago))),
                           DataCell(Text(DateFormat("dd-MM-yy").format(reporte.proximaFechaPago))),
                           DataCell(Text("\$${reporte.montoPago}")),
+                          DataCell(Text(reporte.nombreDisciplina ?? "Desconocida")),
                           DataCell(Text(reporte.tipoPago)),
                           DataCell(IconButton(
                             icon: Icon(FontAwesomeIcons.penToSquare, color: Colors.blue[900]),
@@ -329,7 +331,7 @@ class _InformacionScreenState extends State<InformacionScreen> {
                                     idCliente: cliente.id!, 
                                     estaEditando: true, 
                                     pagoEditar: reporte,
-                                    disciplinas: disciplinasCliente,
+                                    disciplinas: [reporte.nombreDisciplina ?? ""],
                                   );
                                 }
                               );

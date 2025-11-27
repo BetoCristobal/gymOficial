@@ -6,11 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:mygym/data/models/disciplina_model.dart';
 import 'package:mygym/data/models/pago_model.dart';
 import 'package:mygym/data/repositories/disciplina_repository.dart';
-import 'package:mygym/providers/cliente_provider.dart';
 import 'package:mygym/providers/pago_provider.dart';
 import 'package:mygym/styles/text_styles.dart';
-import 'package:mygym/utils/asignar_estatus.dart';
-import 'package:mygym/utils/calcular_dias_restantes.dart';
 import 'package:mygym/utils/seleccionar_fecha.dart';
 import 'package:provider/provider.dart';
 
@@ -49,16 +46,19 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
   void initState() {
     super.initState();
     if(widget.estaEditando == true) {
-      //montoController = TextEditingController(text: widget.pagoEditar!.montoPago.toString());
-      cargarDisciplinas();
-
-      valorDropDownButton = widget.pagoEditar!.tipoPago;
+      // Solo hay una disciplina al editar
+      final nombreDisciplina = widget.pagoEditar!.nombreDisciplina ?? widget.disciplinas.first;
+      montoControllers[nombreDisciplina] = TextEditingController(
+        text: widget.pagoEditar!.montoPago.toStringAsFixed(0),
+      );
+      tipoPagoSeleccionado[nombreDisciplina] = widget.pagoEditar!.tipoPago;
 
       fechaPago = widget.pagoEditar!.fechaPago;
       fechaProximoPago = widget.pagoEditar!.proximaFechaPago;
 
       txtFechaPago = DateFormat("dd-MM-yyyy").format(fechaPago!);
       txtFechaProximoPago = DateFormat("dd-MM-yyyy").format(fechaProximoPago!);
+      cargarDisciplinas();
     }
   }
 
@@ -71,7 +71,6 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
   @override
   Widget build(BuildContext context) {
 
-    final clienteProvider = Provider.of<ClienteProvider>(context, listen: false);
 
     // Verifica si la lista de disciplinas es null o vacía
     if (widget.disciplinas.isEmpty) {
@@ -336,8 +335,9 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 29, 173, 33)
                     ),
-                    onPressed: () async {
-                      // Validar que todos los montos y tipos de pago estén completos
+                    onPressed: () async {                          
+
+                      // Validar campos por disciplina
                       bool faltanMontos = widget.disciplinas.any((nombreDisciplina) =>
                         montoControllers[nombreDisciplina]?.text == null ||
                         montoControllers[nombreDisciplina]!.text.isEmpty
@@ -345,6 +345,76 @@ class _FormAgregarEditarPagoState extends State<FormAgregarEditarPago> {
                       bool faltanTipos = widget.disciplinas.any((nombreDisciplina) =>
                         tipoPagoSeleccionado[nombreDisciplina] == null
                       );
+
+                      if (faltanMontos || faltanTipos) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text("Advertencia"),
+                            content: Text("Debe ingresar monto y tipo de pago para cada disciplina."),
+                          ),
+                        );
+                        return;
+                      } 
+                      
+                      // Validar fechas
+                        if (fechaPago == null || fechaProximoPago == null) {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text("Advertencia"),
+                              content: Text("Debe seleccionar ambas fechas."),
+                            ),
+                          );
+                          return;
+                        }
+                        if (!fechaProximoPago!.isAfter(fechaPago!)) {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text("Advertencia"),
+                              content: Text("La fecha de próximo pago debe ser posterior a la fecha de pago."),
+                            ),
+                          );
+                          return;
+                        }
+
+                        final pagoProvider = Provider.of<PagoProvider>(context, listen: false);
+
+                        if (!widget.estaEditando) {
+                          // Guardar un pago por cada disciplina
+                          for (var nombreDisciplina in widget.disciplinas) {
+                            final monto = double.tryParse(montoControllers[nombreDisciplina]!.text) ?? 0.0;
+                            final tipoPago = tipoPagoSeleccionado[nombreDisciplina]!;
+
+                            await pagoProvider.agregarPago(
+                              widget.idCliente,
+                              monto,
+                              fechaPago!,
+                              fechaProximoPago!,
+                              tipoPago,
+                              nombreDisciplina,
+                            );
+                          }
+                          Navigator.pop(context);
+                        } else {
+                          // Editar solo el pago seleccionado (usa la primera disciplina)
+                          final nombreDisciplina = widget.disciplinas.first;
+                          final monto = double.tryParse(montoControllers[nombreDisciplina]!.text) ?? 0.0;
+                          final tipoPago = tipoPagoSeleccionado[nombreDisciplina]!;
+
+                          await pagoProvider.actualizarPago(
+                            widget.pagoEditar!.id!,
+                            widget.idCliente,
+                            monto,
+                            fechaPago!,
+                            fechaProximoPago!,
+                            tipoPago,
+                            nombreDisciplina, 
+                          );
+                          Navigator.pop(context);
+                        };
+                      
 
                       // if (formKeyPagos.currentState!.validate() &&
                       //     fechaPago != null &&
