@@ -151,24 +151,31 @@ class _InformacionScreenState extends State<InformacionScreen> {
                               
                                   //---------------------------------------------------------BOTON EDITAR CLIENTE
                                   IconButton(
-                                    onPressed: () {
-                                      showModalBottomSheet(
-                                            isScrollControlled: true,
-                                            context: context, 
-                                            builder: (BuildContext context) {
-                                              return DraggableScrollableSheet(
-                                                initialChildSize: 0.8, // 80% de la pantalla
-                                                minChildSize: 0.5,
-                                                maxChildSize: 0.95,
-                                                expand: false,
-                                                builder: (context, ScrollController) {
-                                                  return SingleChildScrollView(
-                                                    controller: ScrollController,
-                                                    child: FormAgregarEditarCliente(estaEditando: true, cliente: cliente,));
-                                                }
+                                    onPressed: () async {
+                                      final resultado = await showModalBottomSheet<bool>(
+                                        isScrollControlled: true,
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return DraggableScrollableSheet(
+                                            initialChildSize: 0.8,
+                                            minChildSize: 0.5,
+                                            maxChildSize: 0.95,
+                                            expand: false,
+                                            builder: (context, ScrollController) {
+                                              return SingleChildScrollView(
+                                                controller: ScrollController,
+                                                child: FormAgregarEditarCliente(estaEditando: true, cliente: cliente),
                                               );
                                             }
                                           );
+                                        }
+                                      );
+                                      if (resultado == true) {
+                                        // Recarga los datos del cliente y pagos
+                                        await Provider.of<ClienteProvider>(context, listen: false).cargarClientes();
+                                        await Provider.of<PagoProvider>(context, listen: false).cargarPagosClientePorId(widget.clienteId);
+                                        setState(() {}); // Reconstruye la pantalla
+                                      }
                                     }, 
                                     icon: Icon(FontAwesomeIcons.userPen, color: Colors.blue[900]),
                                     style: ButtonStyle(

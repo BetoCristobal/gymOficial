@@ -230,4 +230,38 @@ class ReportesProvider extends ChangeNotifier{
       print('❌ Error al filtrar reportes: $e');
     }
   }
+
+  Future<void> cargarReportesCombinados({
+    required String disciplina,
+    required String tipoPago,
+    required DateTime fechaInicio,
+    required DateTime fechaFin,
+  }) async {
+    try {
+      txtFechaInicioFiltro = DateFormat('dd-MM-yyyy').format(fechaInicio);
+      txtFechaFinFiltro = DateFormat('dd-MM-yyyy').format(fechaFin);
+      txtTipoPago = tipoPago;
+
+      _reportesFiltrados = _reportes.where((reporte) {
+        final enRango = reporte.fechaPago.isAfter(fechaInicio.subtract(Duration(seconds: 1))) &&
+                        reporte.fechaPago.isBefore(fechaFin.add(Duration(days: 1)));
+
+        final coincideDisciplina = (disciplina == "Todas") ||
+            (reporte.nombreDisciplina?.toLowerCase() == disciplina.toLowerCase());
+
+        final coincideTipoPago = (tipoPago == "Todos") ||
+            (reporte.tipoPago.toLowerCase() == tipoPago.toLowerCase());
+
+        return enRango && coincideDisciplina && coincideTipoPago;
+      }).toList();
+
+      _sumaTotal = _reportesFiltrados.fold<double>(0, (suma, item) => suma += item.montoPago);
+
+      _reportesMostrar = _reportesFiltrados;
+      clasificarPagosPorTipoFiltrados();
+      notifyListeners();
+    } catch (e) {
+      print('❌ Error al filtrar reportes combinados: $e');
+    }
+  }
 }

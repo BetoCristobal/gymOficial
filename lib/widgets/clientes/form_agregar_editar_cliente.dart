@@ -448,7 +448,7 @@ class _FormAgregarEditarClienteState extends State<FormAgregarEditarCliente> {
                                     );
                                   }
                   
-                                  Navigator.pop(context);                                  
+                                  Navigator.pop(context, true);                                  
                                 }
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text(widget.estaEditando == false ? "👌Cliente guardado" : "👌Cliente actualizado")),

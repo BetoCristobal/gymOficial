@@ -32,9 +32,9 @@ class _FormAplicarFiltrosState extends State<FormAplicarFiltros> {
   @override
   Widget build(BuildContext context) {
 
-    final disciplinasActivas = Provider.of<DisciplinaProvider>(context).disciplinasActivas;
+    final todasDisciplinas = Provider.of<DisciplinaProvider>(context).disciplinas;
 
-    final List<String> optionDisciplinas = ['Todas', ...disciplinasActivas.map((d) => d.nombre)];
+    final List<String> optionDisciplinas = ['Todas', ...todasDisciplinas.map((d) => d.nombre)];
     
 
     return IntrinsicHeight(
@@ -209,26 +209,49 @@ class _FormAplicarFiltrosState extends State<FormAplicarFiltros> {
                       backgroundColor: const Color.fromARGB(255, 29, 173, 33)
                     ),
                     onPressed: () {
-                      if(fechaInicio != null && fechaFin != null && valorDropDownButton != null) {
-                        print("FILTROS APLICADOS");
-                        if(valorDropDownButton == "Todos") {
-                          Provider.of<ReportesProvider>(context, listen: false).cargarReportesFiltradosTodosPorFecha(fechaInicio!, fechaFin!);
-                          Navigator.pop(context);
-                        } else {
-                          Provider.of<ReportesProvider>(context, listen: false).cargarReportesFiltrados(valorDropDownButton!, fechaInicio!, fechaFin!);
-                          Navigator.pop(context);
-                        }                      
-                      } else {
+                      if (valorDropDownDisciplina == null ||
+                          valorDropDownButton == null ||
+                          fechaInicio == null ||
+                          fechaFin == null) {
                         showDialog(
-                          context: context, 
+                          context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
                               title: Text("Advertencia"),
-                              content: Text("Debe seleccionar los campos para aplicar filtro."),
+                              content: Text("Debe seleccionar disciplina, forma de pago y ambas fechas para aplicar el filtro."),
                             );
                           }
                         );
+                        return;
                       }
+
+                      Provider.of<ReportesProvider>(context, listen: false).cargarReportesCombinados(
+                        disciplina: valorDropDownDisciplina!,
+                        tipoPago: valorDropDownButton!,
+                        fechaInicio: fechaInicio!,
+                        fechaFin: fechaFin!,
+                      );
+                      Navigator.pop(context);
+                      // if(fechaInicio != null && fechaFin != null && valorDropDownButton != null && valorDropDownDisciplina != null) {
+                      //   print("FILTROS APLICADOS");
+                      //   if(valorDropDownButton == "Todos") {
+                      //     Provider.of<ReportesProvider>(context, listen: false).cargarReportesFiltradosTodosPorFecha(fechaInicio!, fechaFin!);
+                      //     Navigator.pop(context);
+                      //   } else {
+                      //     Provider.of<ReportesProvider>(context, listen: false).cargarReportesFiltrados(valorDropDownButton!, fechaInicio!, fechaFin!);
+                      //     Navigator.pop(context);
+                      //   }                      
+                      // } else {
+                      //   showDialog(
+                      //     context: context, 
+                      //     builder: (BuildContext context) {
+                      //       return AlertDialog(
+                      //         title: Text("Advertencia"),
+                      //         content: Text("Debe seleccionar los campos para aplicar filtro."),
+                      //       );
+                      //     }
+                      //   );
+                      // }
                     }, 
                   ),
                 )
