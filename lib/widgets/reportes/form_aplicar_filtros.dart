@@ -2,6 +2,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:mygym/providers/disciplina_provider.dart';
 import 'package:mygym/providers/reportes_provider.dart';
 import 'package:mygym/styles/text_styles.dart';
 import 'package:mygym/utils/seleccionar_fecha.dart';
@@ -21,6 +22,8 @@ class _FormAplicarFiltrosState extends State<FormAplicarFiltros> {
   final List<String> options = ['Todos', 'Efectivo', 'Tarjeta', 'Transferencia'];
   String? valorDropDownButton;
 
+  String? valorDropDownDisciplina;
+
   DateTime? fechaInicio;
   String txtFechaInicio = "Seleccionar";
   DateTime? fechaFin;
@@ -28,6 +31,12 @@ class _FormAplicarFiltrosState extends State<FormAplicarFiltros> {
 
   @override
   Widget build(BuildContext context) {
+
+    final disciplinasActivas = Provider.of<DisciplinaProvider>(context).disciplinasActivas;
+
+    final List<String> optionDisciplinas = ['Todas', ...disciplinasActivas.map((d) => d.nombre)];
+    
+
     return IntrinsicHeight(
       child: Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -42,7 +51,7 @@ class _FormAplicarFiltrosState extends State<FormAplicarFiltros> {
                   child: Text("Aplicar filtro:", style: TextStyles.tituloShowModal,  ),
                 ),
             
-                //LISTA DROPDOWN
+                //LISTA DROPDOWN DISCIPLINAS  
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10),                
                   margin: EdgeInsets.symmetric(vertical: 10),
@@ -52,6 +61,49 @@ class _FormAplicarFiltrosState extends State<FormAplicarFiltros> {
                   ),
                   child: DropdownButton2<String>(
                     isExpanded: true,
+                    underline: SizedBox(),
+                    dropdownStyleData: DropdownStyleData(
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 0, 132, 255),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    buttonStyleData: ButtonStyleData(
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 0, 132, 255),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                    ),
+                    iconStyleData: IconStyleData(
+                      icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                    ),
+                    hint: Text("Elige una disciplina", style: TextStyle(color: Colors.white)),
+                    value: valorDropDownDisciplina,
+                    items: optionDisciplinas.map((String option) {
+                      return DropdownMenuItem(
+                        value: option,
+                        child: Text(option, style: TextStyle(color: Colors.white)),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        valorDropDownDisciplina = newValue;
+                      });
+                    },
+                  ),
+                ),
+                //LISTA DROPDOWN FORMA DE PAGO
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10),                
+                  margin: EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: const Color.fromARGB(255, 0, 132, 255),  
+                  ),
+                  child: DropdownButton2<String>(
+                    isExpanded: true,
+                    underline: SizedBox(),
                     dropdownStyleData: DropdownStyleData(
                       decoration: BoxDecoration(
                         color: const Color.fromARGB(255, 0, 132, 255),
