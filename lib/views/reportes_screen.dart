@@ -1,6 +1,7 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mygym/data/models/reporte_pago_model.dart';
 import 'package:mygym/providers/reportes_provider.dart';
 import 'package:mygym/styles/text_styles.dart';
 import 'package:mygym/utils/pdf_utils.dart';
@@ -93,7 +94,8 @@ class _ReportesScreenState extends State<ReportesScreen> {
                 Text(reportesProvider.txtFechaInicioFiltro == null 
                   ? "Resultados no filtrados" 
                   : "Del  ${reportesProvider.txtFechaInicioFiltro}  al  ${reportesProvider.txtFechaFinFiltro}", style: TextStyles.textoFiltros),
-                  Text("Tipo de pago: ${reportesProvider.txtTipoPago}", style: TextStyles.textoFiltros,),
+                Text("Disciplina: ${reportesProvider.txtDisciplinaFiltro ?? 'Todas'}",style: TextStyles.textoFiltros,),
+                Text("Tipo de pago: ${reportesProvider.txtTipoPago}", style: TextStyles.textoFiltros,),
                 Text("Total: \$ ${reportesProvider.sumaPagos.toStringAsFixed(2)}", style: TextStyles.textoTotal,),
 
                 // TOTALES POR TIPO DE PAGO
@@ -125,44 +127,60 @@ class _ReportesScreenState extends State<ReportesScreen> {
                 ),
 
                 Expanded(
-                  child: DataTable2(
+                  child: PaginatedDataTable2(
                     columnSpacing: 10,
                     horizontalMargin: 12,
                     minWidth: 530,
+                    rowsPerPage: 10, // <-- Aquí defines cuántas filas por página
                     columns: [
-                      //DataColumn(label: Text("#")),
                       DataColumn2(label: Text("Nombre cliente:")),
-                      DataColumn2(label: Text("Fecha pago:"), ),
+                      DataColumn2(label: Text("Fecha pago:")),
                       DataColumn2(label: Text("Monto:"), size: ColumnSize.S),
                       DataColumn2(label: Text("Disciplina:"), size: ColumnSize.S),
-                      DataColumn2(label: Text("Tipo:"),),
-                    ], 
-                    rows: reportesProvider.reportesMostrar.asMap().entries.map((entry) {
-
-                      final index = entry.key;
-                      final reporte = entry.value;
-                      
-                      final txtFechaPago = DateFormat("dd-MM-yyyy").format(reporte.fechaPago);
-                      return DataRow(
-                        color: MaterialStateProperty.resolveWith<Color?>(
-                          (Set<MaterialState> states) {
-                            // Alternar colores claros para mejorar la legibilidad
-                            return index % 2 == 0 ? Colors.grey.shade200 : Colors.white;
-                          },
-                        ),
-                        cells: [
-                          DataCell(Text(reporte.nombreCliente, maxLines: 2,  overflow: TextOverflow.ellipsis,)),
-                          DataCell(Text(txtFechaPago)),
-                          DataCell(Text("\$${reporte.montoPago}")),
-                          DataCell(Text(reporte.nombreDisciplina!)),
-                          DataCell(Text(reporte.tipoPago)),
-                        ]
-                      );
-                    }).toList()
+                      DataColumn2(label: Text("Tipo:")),
+                    ],
+                    source: ReportesDataSource(reportesProvider.reportesMostrar, context),
                   ),
                 ),
               ]
             )
     );
   }     
+}
+
+class ReportesDataSource extends DataTableSource {
+  final List<ReportePagoModel> reportes;
+  final BuildContext context;
+
+  ReportesDataSource(this.reportes, this.context);
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= reportes.length) return null;
+    final reporte = reportes[index];
+    final txtFechaPago = DateFormat("dd-MM-yyyy").format(reporte.fechaPago);
+    return DataRow(
+      color: MaterialStateProperty.resolveWith<Color?>(
+        (Set<MaterialState> states) {
+          return index % 2 == 0 ? Colors.grey.shade200 : Colors.white;
+        },
+      ),
+      cells: [
+        DataCell(Text(reporte.nombreCliente, maxLines: 2, overflow: TextOverflow.ellipsis)),
+        DataCell(Text(txtFechaPago)),
+        DataCell(Text("\$${reporte.montoPago}")),
+        DataCell(Text(reporte.nombreDisciplina ?? "")),
+        DataCell(Text(reporte.tipoPago)),
+      ],
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => reportes.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

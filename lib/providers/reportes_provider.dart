@@ -24,6 +24,9 @@ class ReportesProvider extends ChangeNotifier{
   double get sumaPagos => _sumaTotal;
   List<ReportePagoModel> get reportesMostrar => _reportesMostrar;
 
+  String? txtDisciplinaFiltro;
+  String? get disciplinaFiltro => txtDisciplinaFiltro;
+
   //---------------variables y geters para reportes----------
   List<ReportePagoModel> _pagosEfectivo = [];
   List<ReportePagoModel> _pagosTransferencia = [];
@@ -241,6 +244,7 @@ class ReportesProvider extends ChangeNotifier{
       txtFechaInicioFiltro = DateFormat('dd-MM-yyyy').format(fechaInicio);
       txtFechaFinFiltro = DateFormat('dd-MM-yyyy').format(fechaFin);
       txtTipoPago = tipoPago;
+      txtDisciplinaFiltro = disciplina;
 
       _reportesFiltrados = _reportes.where((reporte) {
         final enRango = reporte.fechaPago.isAfter(fechaInicio.subtract(Duration(seconds: 1))) &&
