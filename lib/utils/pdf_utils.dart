@@ -21,6 +21,7 @@ Future<void> exportarReportePDFYCompartir(ReportesProvider reportesProvider) asy
         pw.Text("Fecha de generación: ${formatter.format(DateTime.now())}", style: pw.TextStyle(fontSize: 14)),
         if(reportesProvider.txtFechaInicioFiltro != null) ...[
           pw.Text("Periodo: ${reportesProvider.txtFechaInicioFiltro} - ${reportesProvider.txtFechaFinFiltro}", style: pw.TextStyle(fontSize: 14)),
+          pw.Text("Disciplina: ${reportesProvider.txtDisciplinaFiltro ?? 'Todas'}", style: pw.TextStyle(fontSize: 14)), // <-- Agregado aquí
           pw.Text("Tipo de pago: ${reportesProvider.txtTipoPago}", style: pw.TextStyle(fontSize: 14)),
         ] else
           pw.Text("Reporte sin filtros aplicados", style: pw.TextStyle(fontSize: 14)),
