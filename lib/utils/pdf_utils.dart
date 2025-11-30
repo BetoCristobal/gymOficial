@@ -14,28 +14,36 @@ Future<void> exportarReportePDFYCompartir(ReportesProvider reportesProvider) asy
   pdf.addPage(
     pw.MultiPage(
       pageFormat: PdfPageFormat.letter,
+      margin: pw.EdgeInsets.all(20),
       build: (context) => [
         pw.Text("Reporte de pagos", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
         pw.SizedBox(height: 10),
+        pw.Text("Fecha de generación: ${formatter.format(DateTime.now())}", style: pw.TextStyle(fontSize: 14)),
         if(reportesProvider.txtFechaInicioFiltro != null) ...[
-          pw.Text("Periodo: ${reportesProvider.txtFechaInicioFiltro} - ${reportesProvider.txtFechaFinFiltro}", style: pw.TextStyle(fontSize: 18)),
-          pw.Text("Tipo de pago: ${reportesProvider.txtTipoPago}", style: pw.TextStyle(fontSize: 18)),
+          pw.Text("Periodo: ${reportesProvider.txtFechaInicioFiltro} - ${reportesProvider.txtFechaFinFiltro}", style: pw.TextStyle(fontSize: 14)),
+          pw.Text("Tipo de pago: ${reportesProvider.txtTipoPago}", style: pw.TextStyle(fontSize: 14)),
         ] else
-          pw.Text("Reporte sin filtros aplicados", style: pw.TextStyle(fontSize: 18)),
-        pw.Text("Total: \$${reportesProvider.sumaPagos.toStringAsFixed(2)}", style: pw.TextStyle(fontSize: 18)),
+          pw.Text("Reporte sin filtros aplicados", style: pw.TextStyle(fontSize: 14)),
+        pw.Text("Total: \$${reportesProvider.sumaPagos.toStringAsFixed(2)}", style: pw.TextStyle(fontSize: 14)),
         pw.SizedBox(height: 10),
         pw.Table.fromTextArray(
           border: pw.TableBorder.all(),
-          headers: ['Cliente', "Fecha de pago", "Monto", "Tipo"],
-          data: reportesProvider.reportesMostrar.map((r) {
-              return[
+          headers: ['#', 'Cliente', "Fecha de pago", "Monto", "Disciplina", "Tipo"],
+          cellStyle: pw.TextStyle(fontSize: 11),
+          data: List.generate(
+            reportesProvider.reportesMostrar.length,
+            (index) {
+              final r = reportesProvider.reportesMostrar[index];
+              return [
+                (index + 1).toString(),
                 r.nombreCliente,
                 formatter.format(r.fechaPago),
                 "\$${r.montoPago.toStringAsFixed(2)}",
+                r.nombreDisciplina ?? '',
                 r.tipoPago,
               ];
-            }
-          ).toList()
+            },
+          ),
         ),
       ]
     )

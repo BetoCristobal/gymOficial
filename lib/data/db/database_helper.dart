@@ -140,6 +140,30 @@ class DatabaseHelper {
             );
 
             print("✔ Todos los pagos antiguos ahora apuntan a nombre_disciplina = General");
+
+            // 5. Quitar ON DELETE CASCADE de la FK de pagos a clientes
+            // SQLite no permite modificar FKs directamente, así que recreamos la tabla:
+            await db.execute('''
+              CREATE TABLE pagos_temp (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_cliente INTEGER NOT NULL,
+                monto_pago REAL NOT NULL,
+                fecha_pago TEXT NOT NULL,
+                proxima_fecha_pago TEXT NOT NULL,
+                tipo_pago TEXT NOT NULL,
+                nombre_disciplina TEXT,
+                FOREIGN KEY (id_cliente) REFERENCES clientes(id)
+              );
+            ''');
+
+            await db.execute('''
+              INSERT INTO pagos_temp (id, id_cliente, monto_pago, fecha_pago, proxima_fecha_pago, tipo_pago, nombre_disciplina)
+              SELECT id, id_cliente, monto_pago, fecha_pago, proxima_fecha_pago, tipo_pago, nombre_disciplina FROM pagos;
+            ''');
+
+            await db.execute('DROP TABLE pagos;');
+            await db.execute('ALTER TABLE pagos_temp RENAME TO pagos;');
+
             print("🎉 Migración a versión 2 completada con éxito.");
           }
         },
