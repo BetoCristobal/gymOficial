@@ -53,5 +53,12 @@ class ClienteDisciplinaRepository {
     return maps.map((map) => map['nombre'] as String).toList();
   }
 
-  
+  Future<void> quitarDisciplinaDeTodosLosClientes(int idDisciplina) async {
+    final db = await _dbHelper.database;
+    await db.delete(
+      'cliente_disciplinas',
+      where: 'id_disciplina = ?',
+      whereArgs: [idDisciplina],
+    );
+  }
 }

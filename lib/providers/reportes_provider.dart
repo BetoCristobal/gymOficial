@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mygym/data/models/cliente_model.dart';
-import 'package:mygym/data/models/disciplina_model.dart';
 import 'package:mygym/data/models/reporte_pago_model.dart';
 import 'package:mygym/data/repositories/cliente_repository.dart';
 import 'package:mygym/data/repositories/disciplina_repository.dart';

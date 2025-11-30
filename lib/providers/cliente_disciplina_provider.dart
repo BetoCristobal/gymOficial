@@ -38,6 +38,9 @@ class ClienteDisciplinaProvider extends ChangeNotifier {
   }
 
 
-
+  Future<void> quitarDisciplinaDeTodosLosClientes(int idDisciplina) async {
+    await repo.quitarDisciplinaDeTodosLosClientes(idDisciplina);
+    // No es necesario llamar a cargarDisciplinas aquí, pero puedes hacerlo si quieres refrescar la UI.
+  }
   
 }

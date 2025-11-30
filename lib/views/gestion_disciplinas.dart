@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mygym/providers/cliente_disciplina_provider.dart';
 import 'package:mygym/widgets/disciplinas/alert_dialog_eliminar_disciplina.dart';
 import 'package:provider/provider.dart';
 import 'package:mygym/data/models/disciplina_model.dart';
@@ -139,6 +140,10 @@ class _GestionDisciplinasScreenState extends State<GestionDisciplinasScreen> {
                                     ),
                                   );
                                   if (confirm != true) return;
+
+                                  // Quitar la disciplina de todos los clientes
+                                  await Provider.of<ClienteDisciplinaProvider>(context, listen: false)
+                                      .quitarDisciplinaDeTodosLosClientes(disciplina.id!);
                                 }
                                 await Provider.of<DisciplinaProvider>(context, listen: false)
                                     .actualizarEstadoDisciplina(disciplina.id!, value ? 1 : 0);

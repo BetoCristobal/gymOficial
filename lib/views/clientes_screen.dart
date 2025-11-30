@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mygym/data/models/pago_model.dart';
 import 'package:mygym/providers/cliente_disciplina_provider.dart';
 import 'package:mygym/providers/cliente_provider.dart';
 import 'package:mygym/providers/disciplina_provider.dart';
 import 'package:mygym/providers/pago_provider.dart';
-import 'package:mygym/views/ver_fotos.dart';
 import 'package:mygym/widgets/clientes/barra_busqueda.dart';
 import 'package:mygym/widgets/clientes/cliente_card.dart';
 import 'package:mygym/widgets/clientes/clientes_drawer.dart';
 import 'package:mygym/widgets/clientes/form_agregar_editar_cliente.dart';
 import 'package:mygym/widgets/clientes/form_filtro_disciplina.dart';
-import 'package:mygym/widgets/clientes/form_filtros_maestro.dart';
 import 'package:mygym/widgets/clientes/my_toggle_buttons.dart';
 import 'package:provider/provider.dart';
 
