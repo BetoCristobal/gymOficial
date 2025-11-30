@@ -167,6 +167,7 @@ class ReportesProvider extends ChangeNotifier{
     txtFechaInicioFiltro = null;
     txtFechaFinFiltro = null;
     txtTipoPago = "Todos";
+    txtDisciplinaFiltro = null;
     cargarReportes();
   }
 
