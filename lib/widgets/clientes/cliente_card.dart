@@ -11,6 +11,7 @@ import 'package:mygym/utils/calcular_dias_restantes.dart';
 import 'package:mygym/views/informacion_screen.dart';
 import 'package:mygym/widgets/clientes/popupMenu/form_agregar_editar_pago.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class ClienteCard extends StatelessWidget {
   final List<String> disciplinas;
@@ -50,7 +51,7 @@ class ClienteCard extends StatelessWidget {
                 gradient: fondoCard
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                padding: const EdgeInsets.only(top: 0, bottom: 10, left: 10, right: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -64,6 +65,42 @@ class ClienteCard extends StatelessWidget {
                             softWrap: true,
                             maxLines: 2,                            
                           ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.qr_code, color: Colors.white),
+                          tooltip: "Mostrar QR",
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text("Código QR"),
+                                content: SingleChildScrollView(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text("${cliente.nombres} ${cliente.apellidos}"),
+                                      //SizedBox(height: 10),
+                                      SizedBox(
+                                        width: 180,
+                                        height: 180,
+                                        child: QrImageView(
+                                          data: "${cliente.nombres} ${cliente.apellidos}",
+                                          version: QrVersions.auto,
+                                          size: 180,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    child: Text("Cerrar"),
+                                    onPressed: () => Navigator.of(context).pop(),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),                    
