@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mygym/data/models/cliente_model.dart';
@@ -10,8 +13,11 @@ import 'package:mygym/utils/asignar_estatus.dart';
 import 'package:mygym/utils/calcular_dias_restantes.dart';
 import 'package:mygym/views/informacion_screen.dart';
 import 'package:mygym/widgets/clientes/popupMenu/form_agregar_editar_pago.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ClienteCard extends StatelessWidget {
   final List<String> disciplinas;
@@ -21,7 +27,25 @@ class ClienteCard extends StatelessWidget {
   const ClienteCard({super.key, required this.cliente, required this.ultimoPago, required this.disciplinas});  
 
   @override
-  Widget build(BuildContext context) {   
+  Widget build(BuildContext context) { 
+
+    //CONTROLADOR PARA CAPTURAR EL QR GENERADO Y GUARDARLO EN LA GALERIA DEL DISPOSITIVO
+    final ScreenshotController screenshotController = ScreenshotController();  
+
+    //Funcion para guardar el QR en la galeria del dispositivo
+    Future<void> _exportQr() async {
+      final Uint8List? image = await screenshotController.capture();
+      if (image != null) {
+        // Guarda la imagen en un archivo temporal
+        final tempDir = await getTemporaryDirectory();
+        final fileName = "QR_${cliente.nombres}_${cliente.apellidos}".replaceAll(" ", "_") + ".png";
+        final file = File('${tempDir.path}/$fileName');
+        await file.writeAsBytes(image);
+
+        // Comparte la imagen usando share_plus
+        await Share.shareXFiles([XFile(file.path)], text: "QR de ${cliente.nombres} ${cliente.apellidos}");
+      }
+    }
 
     String txtFechaPago;
     String txtProximaFechaPago;
@@ -83,16 +107,28 @@ class ClienteCard extends StatelessWidget {
                                       SizedBox(
                                         width: 180,
                                         height: 180,
-                                        child: QrImageView(
-                                          data: "${cliente.nombres} ${cliente.apellidos}",
-                                          version: QrVersions.auto,
-                                          size: 180,
+                                        child: Screenshot(
+                                          controller: screenshotController,
+                                          child: Container(
+                                            color: Colors.white,
+                                            child: QrImageView(
+                                              data: "${cliente.nombres} ${cliente.apellidos}",
+                                              version: QrVersions.auto,
+                                              size: 180,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
                                 actions: [
+                                  TextButton(
+                                    child: Text("Exportar"),
+                                    onPressed: () async {
+                                      await _exportQr();
+                                    },
+                                  ),
                                   TextButton(
                                     child: Text("Cerrar"),
                                     onPressed: () => Navigator.of(context).pop(),
