@@ -68,7 +68,8 @@ class DatabaseHelper {
             CREATE TABLE disciplinas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT NOT NULL,
-            descripcion TEXT
+            descripcion TEXT,
+            activa INTEGER DEFAULT 1
             )
             '''
           );
