@@ -174,6 +174,8 @@ class _FormAgregarEditarClienteState extends State<FormAgregarEditarCliente> {
                   child: TextFormField(
                     controller: nombresController,
                     textCapitalization: TextCapitalization.words,
+                    autocorrect: false,
+                    enableSuggestions: false,
                     decoration: InputDecoration(
                       labelText: "Nombres (obligatorio)",
                       border: OutlineInputBorder(
@@ -192,6 +194,8 @@ class _FormAgregarEditarClienteState extends State<FormAgregarEditarCliente> {
                   child: TextFormField(
                     controller: apellidosController,
                     textCapitalization: TextCapitalization.words,
+                    autocorrect: false,
+                    enableSuggestions: false,
                     decoration: InputDecoration(
                       labelText: "Apellidos (obligatorio)",
                       border: OutlineInputBorder(
