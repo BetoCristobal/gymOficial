@@ -31,6 +31,8 @@ class ClientesDrawer extends StatelessWidget {
             data: "${cliente.nombres} ${cliente.apellidos}",
             version: QrVersions.auto,
             gapless: false,
+            emptyColor: const Color(0xFFFFFFFF),
+            
           );
           final image = await painter.toImage(400);
           final byteData = await image.toByteData(format: ImageByteFormat.png);
