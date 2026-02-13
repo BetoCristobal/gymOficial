@@ -200,9 +200,19 @@ class ClienteProvider extends ChangeNotifier{
     }
   } 
 
-  void filtrarClientesPorIds(List<int> idsClientes) {
+  ClienteModel? filtrarClientesPorIds(List<int> idsClientes) {
     _clientesFiltrados = _clientes.where((cliente) => idsClientes.contains(cliente.id)).toList();
     notifyListeners();
   }
-  
+
+  // Future<ClienteModel?> consultarPorNombreYApellidos(String query) async {
+  //   if (query.isEmpty) return null;
+  //   final consulta = normalizar(query);
+  //   for (final cliente in _clientes) {
+  //     if (normalizar('${cliente.nombres} ${cliente.apellidos}') == consulta) {
+  //       return cliente;
+  //     }
+  //   }
+  //   return null;
+  // }
 }

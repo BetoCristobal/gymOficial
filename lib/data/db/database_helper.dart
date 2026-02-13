@@ -58,6 +58,7 @@ class DatabaseHelper {
             fecha_pago TEXT NOT NULL,
             proxima_fecha_pago TEXT NOT NULL,
             tipo_pago TEXT NOT NULL,
+            nombre_disciplina TEXT,
             FOREIGN KEY (id_cliente) REFERENCES clientes(id) ON DELETE CASCADE
             )
             '''
