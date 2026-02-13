@@ -85,7 +85,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
         ),
 
         //----------------------------------------------------------Drawer solo para admin
-        drawer: userType == "administrador" ? ClientesDrawer() : null,
+        drawer: ClientesDrawer(userType: userType),
 
         appBar: AppBar(
           iconTheme: IconThemeData(color: Colors.white),

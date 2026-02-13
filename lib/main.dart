@@ -9,6 +9,7 @@ import 'package:mygym/providers/disciplina_provider.dart';
 import 'package:mygym/providers/pago_provider.dart';
 import 'package:mygym/providers/reportes_provider.dart';
 import 'package:mygym/views/clientes_screen.dart';
+import 'package:mygym/views/estatus_clientes_screen.dart';
 import 'package:mygym/views/gestion_contrase%C3%B1as.dart';
 import 'package:mygym/views/login_screen.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +40,7 @@ class MainApp extends StatelessWidget {
           '/clientes': (context) => ClientesScreen(),
           '/login': (context) => LoginScreen(),
           '/gestion_contrasenas': (context) => GestionContrasenasScreen(),
+          '/estatus_clientes': (context) => EstatusClientesScreen(),
         },
       ),
     );

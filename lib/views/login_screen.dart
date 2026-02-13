@@ -58,6 +58,8 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } else if (_selectedUser == "maestro") {
       Navigator.pushReplacementNamed(context, '/clientes', arguments: _selectedUser);
+    } else if (_selectedUser == "clientes") {
+      Navigator.pushReplacementNamed(context, '/estatus_clientes', arguments: _selectedUser);
     }
   }
 
@@ -186,6 +188,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 DropdownMenuItem(
                                   value: "maestro",
                                   child: Text("Maestro"),
+                                ),
+                                DropdownMenuItem(
+                                  value: "clientes",
+                                  child: Text("Clientes"),
                                 ),
                               ],
                               onChanged: (value) {
