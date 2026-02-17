@@ -7,6 +7,9 @@ import 'package:mygym/data/models/pago_model.dart';
 import 'package:mygym/providers/cliente_provider.dart';
 import 'package:mygym/providers/pago_provider.dart';
 import 'package:mygym/utils/calcular_dias_restantes.dart';
+import 'package:mygym/utils/asignar_estatus.dart';
+import 'package:mygym/utils/asignar_emoji.dart';
+import 'package:mygym/utils/asignar_color_fondo_card_cliente.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
@@ -30,6 +33,7 @@ class _EstatusClientesScreenState extends State<EstatusClientesScreen> {
   String? fechaPago;
   String? proximaFechaPago;
   int? diasRestantes;
+  String? estatus;
 
   @override
   void initState() {
@@ -69,12 +73,13 @@ class _EstatusClientesScreenState extends State<EstatusClientesScreen> {
             diasRestantes = calcularDiasRestantes(pago.proximaFechaPago);
           }
         }
+        String nuevoEstatus = asignarEstatus(diasRestantes ?? -999, cliente.id ?? 0);
         setState(() {
           nombreCompleto = '${cliente.nombres} ${cliente.apellidos}';
           idCliente = cliente.id;
           fechaPago = fecha;
           proximaFechaPago = proxima;
-          //pagoModel = pago;
+          estatus = nuevoEstatus;
         });
       } else {
         setState(() {
@@ -209,22 +214,81 @@ class _EstatusClientesScreenState extends State<EstatusClientesScreen> {
                   escaneoActivo = true;
                   cameraController.dispose();
                   cameraController = MobileScannerController();
+                  estatus = null;
                 });
               },
             ),
           SizedBox(height: 24),
           if (nombreCompleto != null && idCliente != null)
-            Column(
-              children: [
-                Text('Nombre: $nombreCompleto', style: TextStyle(fontSize: 18, color: Colors.white)),
-                if (fechaPago != null && proximaFechaPago != null) ...[
-                  Text('Último pago: $fechaPago', style: TextStyle(fontSize: 18, color: Colors.white)),
-                  Text('Próximo pago: $proximaFechaPago', style: TextStyle(fontSize: 18, color: Colors.white)),
-                  Text('Días restantes: $diasRestantes', style: TextStyle(fontSize: 18, color: Colors.white)),
-                ] else ...[
-                  Text('No hay pagos registrados', style: TextStyle(fontSize: 18, color: Colors.yellow)),
-                ]
-              ],
+            Builder(
+              builder: (context) {
+                final emoji = asignarEmoji(estatus ?? "");
+                final gradient = asignarColorFondoCardCliente(estatus ?? "");
+                return Container(
+                  margin: EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    gradient: gradient,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(emoji, style: TextStyle(fontSize: 32)),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              nombreCompleto ?? '',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Divider(color: Colors.white, height: 8),
+                      SizedBox(height: 10),
+                      if (fechaPago != null && proximaFechaPago != null) ...[
+                        Text('Último pago: $fechaPago', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+                        Text('Próximo pago: $proximaFechaPago', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+                        Text('Días restantes: $diasRestantes', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 8),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.18),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            estatus ?? '',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ] else ...[
+                        Text('No hay pagos registrados', style: TextStyle(fontSize: 18, color: Colors.yellow)),
+                      ]
+                    ],
+                  ),
+                );
+              },
             )
           else if (qrResult != null)
             Text('Cliente no encontrado', style: TextStyle(fontSize: 18, color: Colors.red))
