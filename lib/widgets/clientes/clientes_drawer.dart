@@ -34,10 +34,20 @@ class ClientesDrawer extends StatelessWidget {
             version: QrVersions.auto,
             gapless: false,
             emptyColor: const Color(0xFFFFFFFF),
-            
           );
-          final image = await painter.toImage(400);
-          final byteData = await image.toByteData(format: ImageByteFormat.png);
+          // Generar el QR normalmente
+          final qrImage = await painter.toImage(300);
+          // Crear un canvas más grande con fondo blanco
+          final borderedSize = 400;
+          final recorder = PictureRecorder();
+          final canvas = Canvas(recorder);
+          final paint = Paint()..color = Colors.white;
+          canvas.drawRect(Rect.fromLTWH(0, 0, borderedSize.toDouble(), borderedSize.toDouble()), paint);
+          // Dibuja el QR en el centro
+          final offset = ((borderedSize - 300) / 2).toDouble();
+          canvas.drawImage(qrImage, Offset(offset, offset), Paint());
+          final borderedImage = await recorder.endRecording().toImage(borderedSize, borderedSize);
+          final byteData = await borderedImage.toByteData(format: ImageByteFormat.png);
           final pngBytes = byteData!.buffer.asUint8List();
 
           final fileName = "qr_${cliente.id}_${cliente.nombres}_${cliente.apellidos}"
