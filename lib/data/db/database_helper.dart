@@ -92,12 +92,22 @@ class DatabaseHelper {
             CREATE TABLE contraseñas (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               password TEXT NOT NULL,
-              palabra_clave TEXT NOT NULL
+              palabra_clave TEXT NOT NULL,
+              tipo TEXT NOT NULL -- 'administrador' o 'maestro'
             )
             '''
           );
-          // Inserta una contraseña por defecto (puedes cambiarla luego)
-          await db.insert('contraseñas', {'password': '12345', 'palabra_clave': 'gimnasio'});
+          // Inserta admin y maestro por defecto
+          await db.insert('contraseñas', {
+            'password': '12345',
+            'palabra_clave': 'gimnasio',
+            'tipo': 'administrador'
+          });
+          await db.insert('contraseñas', {
+            'password': 'maestro123',
+            'palabra_clave': 'gimnasio',
+            'tipo': 'maestro'
+          });
 
           print("✅ BASE DE DATOS CREADA CON EXITO");//--------------------
         },
@@ -112,39 +122,31 @@ class DatabaseHelper {
           // -----------------------------------------------------------
           if (oldVersion < 2) {
             print("🔄 Ejecutando migración V1 → V2...");
-
             // 1. Agregar columna 'activa' en disciplinas
             await db.execute("""
               ALTER TABLE disciplinas ADD COLUMN activa INTEGER DEFAULT 1;
             """);
             print("✔ Columna 'activa' agregada a disciplinas");
-
             // 2. Agregar columna 'nombre_disciplina' en pagos
             await db.execute("""
               ALTER TABLE pagos ADD COLUMN nombre_disciplina TEXT;
             """);
             print("✔ Columna 'id_disciplina' agregada a pagos");
-
             // 3. Insertar disciplina por defecto "General"
             int idGeneral = await db.insert("disciplinas", {
               "nombre": "General",
               "descripcion": "Disciplina asignada por defecto",
               "activa": 1
             });
-
             print("✔ Disciplina 'General' creada con id = $idGeneral");
-
             // 4. Asignar disciplina General a todos los pagos anteriores
             await db.update(
               "pagos",
               {"nombre_disciplina": "General"},
               where: "nombre_disciplina IS NULL"
             );
-
             print("✔ Todos los pagos antiguos ahora apuntan a nombre_disciplina = General");
-
             // 5. Quitar ON DELETE CASCADE de la FK de pagos a clientes
-            // SQLite no permite modificar FKs directamente, así que recreamos la tabla:
             await db.execute('''
               CREATE TABLE pagos_temp (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -157,15 +159,24 @@ class DatabaseHelper {
                 FOREIGN KEY (id_cliente) REFERENCES clientes(id)
               );
             ''');
-
             await db.execute('''
               INSERT INTO pagos_temp (id, id_cliente, monto_pago, fecha_pago, proxima_fecha_pago, tipo_pago, nombre_disciplina)
               SELECT id, id_cliente, monto_pago, fecha_pago, proxima_fecha_pago, tipo_pago, nombre_disciplina FROM pagos;
             ''');
-
             await db.execute('DROP TABLE pagos;');
             await db.execute('ALTER TABLE pagos_temp RENAME TO pagos;');
-
+            // 6. Migración contraseñas: agregar columna tipo y crear maestro
+            await db.execute("ALTER TABLE contraseñas ADD COLUMN tipo TEXT;");
+            await db.execute("UPDATE contraseñas SET tipo = 'administrador' WHERE id = 1;");
+            // Copiar palabra_clave de admin para maestro
+            final admin = await db.query('contraseñas', where: "id = 1");
+            final palabraClaveAdmin = admin.isNotEmpty ? admin.first['palabra_clave'] : 'gimnasio';
+            await db.insert('contraseñas', {
+              'password': 'maestro123',
+              'palabra_clave': palabraClaveAdmin,
+              'tipo': 'maestro'
+            });
+            print("✔ Migración de contraseñas: columna tipo y maestro creado");
             print("🎉 Migración a versión 2 completada con éxito.");
           }
         },

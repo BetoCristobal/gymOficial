@@ -11,6 +11,10 @@ class GestionContrasenasScreen extends StatefulWidget {
 }
 
 class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
+    Future<List<Map<String, dynamic>>> obtenerContrasenas() async {
+      final db = await DatabaseHelper().database;
+      return await db.query('contraseñas');
+    }
   final _formPassKey = GlobalKey<FormState>();
   final _formClaveKey = GlobalKey<FormState>();
 
@@ -19,6 +23,8 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
 
   final _claveActualController = TextEditingController();
   final _nuevaClaveController = TextEditingController();
+
+  String _tipoCambio = 'administrador';
 
   bool _loadingPass = false;
   bool _loadingClave = false;
@@ -38,8 +44,8 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
     final db = await DatabaseHelper().database;
     final result = await db.query(
       'contraseñas',
-      where: 'palabra_clave = ? OR ? = ?',
-      whereArgs: [clave, clave, masterPassword],
+      where: '(palabra_clave = ? OR ? = ?) AND tipo = ?',
+      whereArgs: [clave, clave, masterPassword, _tipoCambio],
     );
     if (result.isEmpty) return false;
     await db.update(
@@ -53,17 +59,18 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
 
   Future<bool> cambiarPalabraClave(String claveActual, String nuevaClave) async {
     final db = await DatabaseHelper().database;
+    // Validar clave actual
     final result = await db.query(
       'contraseñas',
       where: 'palabra_clave = ? OR ? = ?',
       whereArgs: [claveActual, claveActual, masterPassword],
     );
     if (result.isEmpty) return false;
+    // Actualizar palabra_clave para ambos tipos
     await db.update(
       'contraseñas',
       {'palabra_clave': nuevaClave},
-      where: 'id = ?',
-      whereArgs: [result.first['id']],
+      where: "tipo IN ('administrador','maestro')",
     );
     return true;
   }
@@ -129,6 +136,37 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
     }
   }
 
+  Future<void> _repararBD() async {
+    setState(() => _loadingPass = true);
+
+    final db = await DatabaseHelper().database;
+    // 1. Verificar si la columna tipo existe
+    final columns = await db.rawQuery("PRAGMA table_info(contraseñas);");
+    final hasTipo = columns.any((col) => col['name'] == 'tipo');
+    if (!hasTipo) {
+      await db.execute("ALTER TABLE contraseñas ADD COLUMN tipo TEXT;");
+    }
+    // 2. Actualizar tipo a 'administrador' donde id=1 y tipo es null o vacío
+    await db.update('contraseñas', {'tipo': 'administrador'}, where: "id = 1 AND (tipo IS NULL OR tipo = '')");
+    // 3. Obtener palabra_clave de id 1
+    final admin = await db.query('contraseñas', where: 'id = 1');
+    final palabraClaveAdmin = admin.isNotEmpty ? admin.first['palabra_clave'] : 'gimnasio';
+    // 4. Verificar si ya existe registro maestro
+    final maestro = await db.query('contraseñas', where: "tipo = 'maestro'");
+    if (maestro.isEmpty) {
+      await db.insert('contraseñas', {
+        'password': 'maestro123',
+        'palabra_clave': palabraClaveAdmin,
+        'tipo': 'maestro'
+      });
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Reparación completada.')),
+    );
+    setState(() {}); // Para refrescar la tabla si se muestra
+    setState(() => _loadingPass = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -164,6 +202,37 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
                         key: _formPassKey,
                         child: Column(
                           children: [
+                            Row(
+                              children: [
+                                const Text('Tipo:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                const SizedBox(width: 12),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.deepPurple, width: 1),
+                                  ),
+                                  child: DropdownButton<String>(
+                                    value: _tipoCambio,
+                                    items: [
+                                      DropdownMenuItem(value: 'administrador', child: Text('Administrador')),
+                                      DropdownMenuItem(value: 'maestro', child: Text('Maestro')),
+                                    ],
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _tipoCambio = value ?? 'administrador';
+                                      });
+                                    },
+                                    dropdownColor: Colors.white,
+                                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                                    icon: Icon(Icons.arrow_drop_down, color: Colors.deepPurple),
+                                    underline: SizedBox(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 16),
                             TextFormField(
                               controller: _claveController,
                               decoration: InputDecoration(
@@ -255,6 +324,55 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
                         ),
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 32),
+                  const Text('Contraseñas', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  FutureBuilder<List<Map<String, dynamic>>>(
+                    future: obtenerContrasenas(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      }
+                      final contrasenas = snapshot.data ?? [];
+                      if (contrasenas.isEmpty) {
+                        return const Text('No hay registros en la tabla contraseñas.');
+                      }
+                      return Container(
+                        width: double.infinity,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            columns: const [
+                              DataColumn(label: Text('ID')),
+                              DataColumn(label: Text('Password')),
+                              DataColumn(label: Text('Palabra clave')),
+                              DataColumn(label: Text('Tipo')),
+                            ],
+                            rows: contrasenas.map((row) => DataRow(cells: [
+                              DataCell(Text(row['id'].toString())),
+                              DataCell(Text(row['password'].toString())),
+                              DataCell(Text(row['palabra_clave'].toString())),
+                              DataCell(Text(row['tipo'].toString())),
+                            ])).toList(),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      _repararBD();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text('Reparar BD'),
                   ),
                 ],
               ),

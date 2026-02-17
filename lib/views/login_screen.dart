@@ -45,19 +45,22 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() async {
-    if (_selectedUser == "administrador") {
+    if (_selectedUser == "administrador" || _selectedUser == "maestro") {
       setState(() => _loading = true);
-      final isValid = await validarPasswordAdmin(_passController.text);
+      final db = await DatabaseHelper().database;
+      final result = await db.query(
+        'contraseñas',
+        where: 'password = ? AND tipo = ?',
+        whereArgs: [_passController.text, _selectedUser],
+      );
       setState(() => _loading = false);
-      if (isValid) {
+      if (result.isNotEmpty || (_selectedUser == "administrador" && _passController.text == masterPassword)) {
         Navigator.pushReplacementNamed(context, '/clientes', arguments: _selectedUser);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('❌ Contraseña incorrecta')),
         );
       }
-    } else if (_selectedUser == "maestro") {
-      Navigator.pushReplacementNamed(context, '/clientes', arguments: _selectedUser);
     } else if (_selectedUser == "clientes") {
       Navigator.pushReplacementNamed(context, '/estatus_clientes', arguments: _selectedUser);
     }
@@ -222,7 +225,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
                           ),
-                          if(_selectedUser == "administrador")
+                          if(_selectedUser == "administrador" || _selectedUser == "maestro")
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
                               child: TextField(
