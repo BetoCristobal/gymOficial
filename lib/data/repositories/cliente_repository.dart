@@ -88,9 +88,9 @@ class ClienteRepository {
   }
 
 
-  Future<void> deleteCliente(int id) async {
-    final db= await _dbHelper.database;
-    await db.delete('clientes', where: 'id = ?', whereArgs: [id]);
+  Future<void> desactivarCliente(int id) async {
+    final db = await _dbHelper.database;
+    await db.update('clientes', {'activo': 0}, where: 'id = ?', whereArgs: [id]);
   }
 
 
@@ -115,6 +115,11 @@ class ClienteRepository {
       whereArgs: [idDisciplina],
     );
     return maps.map((map) => map['id_cliente'] as int).toList();
+  }
+
+  Future<void> reactivarCliente(int id) async {
+    final db = await _dbHelper.database;
+    await db.update('clientes', {'activo': 1}, where: 'id = ?', whereArgs: [id]);
   }
 
 }

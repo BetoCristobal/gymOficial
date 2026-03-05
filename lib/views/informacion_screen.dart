@@ -98,9 +98,9 @@ class _InformacionScreenState extends State<InformacionScreen> {
                             Padding(
                               padding: const EdgeInsets.only(top: 10.0),
                               child: Text(
-                                "${cliente.nombres} ${cliente.apellidos}", 
+                                "${cliente.nombres} ${cliente.apellidos} (${cliente.activo == 1 ? 'Activo' : 'Inactivo'})",
                                 style: TextStyle(
-                                  fontSize: 20, 
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold
                                 ),
                                 maxLines: 3,
@@ -184,24 +184,58 @@ class _InformacionScreenState extends State<InformacionScreen> {
                                     ),
                                   ), 
                               
-                                  //---------------------------------------------------------BOTON ELIMINAR CLIENTE
+                                  //---------------------------------------------------------BOTON DESACTIVAR/REACTIVAR CLIENTE
                                   IconButton(
                                     onPressed: () async {
-                                              final resultado = await AlertDialogEliminarCliente(context, cliente.id!);
-                                              if(resultado == true) {
-                                                await clienteProvider.eliminarCliente(cliente.id!);
-                                                Navigator.of(context).pop();
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  SnackBar(content: Text("❌Cliente eliminado")),
-                                                ); 
-                                              }
-                                            },
-                                    icon: Icon(FontAwesomeIcons.xmark, color: Colors.red[900]),
+                                      if (cliente.activo == 1) {
+                                        final resultado = await AlertDialogDesactivarCliente(context, cliente.id!);
+                                        if(resultado == true) {
+                                          await clienteProvider.desactivarCliente(cliente.id!);
+                                          Navigator.of(context).pop();
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text("Cliente desactivado")),
+                                          );
+                                        }
+                                      } else {
+                                        final resultado = await showDialog<bool>(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: const Text("¿Desea reactivar este cliente?"),
+                                            content: const Text("El cliente volverá a estar activo y aparecerá en la lista principal."),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.of(context).pop(false),
+                                                child: const Text("No")
+                                              ),
+                                              TextButton(
+                                                style: TextButton.styleFrom(
+                                                  backgroundColor: Colors.green,
+                                                  foregroundColor: Colors.white,
+                                                  padding: EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                                                ),
+                                                onPressed: () => Navigator.of(context).pop(true),
+                                                child: const Text("Sí")
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                        if(resultado == true) {
+                                          await clienteProvider.reactivarCliente(cliente.id!);
+                                          Navigator.of(context).pop();
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text("Cliente reactivado")),
+                                          );
+                                        }
+                                      }
+                                    },
+                                    icon: cliente.activo == 1
+                                      ? Icon(FontAwesomeIcons.xmark, color: Colors.red[900])
+                                      : Icon(FontAwesomeIcons.check, color: Colors.green[900]),
                                     style: ButtonStyle(
-                                      backgroundColor: WidgetStateProperty.all<Color>(Colors.red[200]!),
+                                      backgroundColor: WidgetStateProperty.all<Color>(cliente.activo == 1 ? Colors.red[200]! : Colors.green[200]!),
                                       shape: WidgetStateProperty.all<CircleBorder>(CircleBorder()),
                                     ),
-                                  ),                          
+                                  ),
                                 ],
                               ),
                             ),

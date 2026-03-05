@@ -136,37 +136,6 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
     }
   }
 
-  Future<void> _repararBD() async {
-    setState(() => _loadingPass = true);
-
-    final db = await DatabaseHelper().database;
-    // 1. Verificar si la columna tipo existe
-    final columns = await db.rawQuery("PRAGMA table_info(contraseñas);");
-    final hasTipo = columns.any((col) => col['name'] == 'tipo');
-    if (!hasTipo) {
-      await db.execute("ALTER TABLE contraseñas ADD COLUMN tipo TEXT;");
-    }
-    // 2. Actualizar tipo a 'administrador' donde id=1 y tipo es null o vacío
-    await db.update('contraseñas', {'tipo': 'administrador'}, where: "id = 1 AND (tipo IS NULL OR tipo = '')");
-    // 3. Obtener palabra_clave de id 1
-    final admin = await db.query('contraseñas', where: 'id = 1');
-    final palabraClaveAdmin = admin.isNotEmpty ? admin.first['palabra_clave'] : 'gimnasio';
-    // 4. Verificar si ya existe registro maestro
-    final maestro = await db.query('contraseñas', where: "tipo = 'maestro'");
-    if (maestro.isEmpty) {
-      await db.insert('contraseñas', {
-        'password': 'maestro123',
-        'palabra_clave': palabraClaveAdmin,
-        'tipo': 'maestro'
-      });
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Reparación completada.')),
-    );
-    setState(() {}); // Para refrescar la tabla si se muestra
-    setState(() => _loadingPass = false);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -364,7 +333,32 @@ class _GestionContrasenasScreenState extends State<GestionContrasenasScreen> {
                   ),
                   ElevatedButton(
                     onPressed: () async {
-                      _repararBD();
+                      setState(() => _loadingPass = true);
+                      final acciones = await DatabaseHelper().repararBD();
+                      setState(() => _loadingPass = false);
+                      setState(() {}); // Refresca la tabla si se muestra
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Reparación completada'),
+                          content: SizedBox(
+                            width: 350,
+                            child: ListView(
+                              shrinkWrap: true,
+                              children: acciones.map((a) => ListTile(
+                                leading: Icon(Icons.check_circle, color: Colors.green),
+                                title: Text(a),
+                              )).toList(),
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: Text('OK'),
+                            )
+                          ],
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,

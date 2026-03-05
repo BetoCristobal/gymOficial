@@ -4,6 +4,7 @@ class ClienteModel {
   String apellidos;
   String telefono;
   String estatus;
+  int activo;
   String? fotoPath;
   String? telefonoEmergencia;
   String? nombreEmergencia;
@@ -16,6 +17,7 @@ class ClienteModel {
     required this.apellidos,
     required this.telefono,
     required this.estatus,
+    this.activo = 1,
     this.fotoPath,
     this.telefonoEmergencia,
     this.nombreEmergencia,
@@ -32,6 +34,7 @@ class ClienteModel {
       'apellidos': apellidos,
       'telefono': telefono,
       'estatus': estatus,
+      'activo': activo,
       'fotoPath': fotoPath,
       'telefono_emergencia': telefonoEmergencia,
       'nombre_emergencia': nombreEmergencia,
@@ -43,16 +46,17 @@ class ClienteModel {
   // Map -> Cliente
   factory ClienteModel.fromMap(Map<String, dynamic> map) {
     return ClienteModel(
-      id: map['id'], 
-      nombres: map['nombres'], 
-      apellidos: map['apellidos'], 
-      telefono: map['telefono'], 
+      id: map['id'],
+      nombres: map['nombres'],
+      apellidos: map['apellidos'],
+      telefono: map['telefono'],
       estatus: map['estatus'],
+      activo: map['activo'] ?? 1,
       fotoPath: map['fotoPath'],
       telefonoEmergencia: map['telefono_emergencia'],
       nombreEmergencia: map['nombre_emergencia'],
       correo: map['correo'],
       observaciones: map['observaciones'],
-      );
+    );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mygym/data/models/cliente_model.dart';
 import 'package:mygym/data/repositories/cliente_repository.dart';
+import 'package:mygym/views/ver_fotos.dart';
 
 enum Opciones {todos, vencidos, urgentes, proximos, corrientes}
 
@@ -112,25 +113,13 @@ class ClienteProvider extends ChangeNotifier{
     }
   }
 
-  Future<void> eliminarCliente(int id) async {
+  Future<void> desactivarCliente(int id) async {
     try{
-      final cliente = await clienteRepo.getClienteById(id);
-
-      if(cliente.fotoPath != null) {
-        final foto = File(cliente.fotoPath!);
-        if(await foto.exists()) {
-          await foto.delete();
-          print("❌ Foto eliminada: ${cliente.fotoPath}");
-        } else {
-          print("La foto no existe: ${cliente.fotoPath}");
-        }
-      }
-
-      await clienteRepo.deleteCliente(id);
+      await clienteRepo.desactivarCliente(id);
       await cargarClientes();
     } catch(e) {
-      print("❌ Error al eliminar cliente: $e");
-    }    
+      print("❌ Error al desactivar cliente: $e");
+    }
   }
 
   
@@ -149,23 +138,23 @@ class ClienteProvider extends ChangeNotifier{
   void aplicarFiltro() {
     switch(opcionesView) {
       case Opciones.todos:
-        _clientesFiltrados = List.from(_clientes);
+        _clientesFiltrados = _clientes.where((c) => c.activo == 1).toList();
       break;
 
       case Opciones.vencidos:
-        _clientesFiltrados = _clientes.where((c) => c.estatus == "Pago vencido").toList();
+        _clientesFiltrados = _clientes.where((c) => c.activo == 1 && c.estatus == "Pago vencido").toList();
       break;
 
       case Opciones.urgentes:
-        _clientesFiltrados = _clientes.where((c) => c.estatus == "Pago urgente").toList();
+        _clientesFiltrados = _clientes.where((c) => c.activo == 1 && c.estatus == "Pago urgente").toList();
       break;
 
       case Opciones.proximos:
-        _clientesFiltrados = _clientes.where((c) => c.estatus == "Próximo a pagar").toList();
+        _clientesFiltrados = _clientes.where((c) => c.activo == 1 && c.estatus == "Próximo a pagar").toList();
       break;
 
       case Opciones.corrientes:
-        _clientesFiltrados = _clientes.where((c) => c.estatus == "Pago al corriente").toList();
+        _clientesFiltrados = _clientes.where((c) => c.activo == 1 && c.estatus == "Pago al corriente").toList();
       break;
     }
     notifyListeners();
@@ -189,7 +178,7 @@ class ClienteProvider extends ChangeNotifier{
     if(query.isEmpty) {
       aplicarFiltro();
     } else {
-      //final lowerCaseQuery = query.toLowerCase();
+      // En búsqueda, mostrar todos (activos e inactivos) que coincidan
       final listaBase = _clientes;
       _clientesFiltrados = listaBase.where((cliente) {
         final nombreCompleto = normalizar('${cliente.nombres} ${cliente.apellidos}');
@@ -198,11 +187,20 @@ class ClienteProvider extends ChangeNotifier{
       }).toList();
       notifyListeners();
     }
-  } 
+  }
 
   ClienteModel? filtrarClientesPorIds(List<int> idsClientes) {
     _clientesFiltrados = _clientes.where((cliente) => idsClientes.contains(cliente.id)).toList();
     notifyListeners();
+  }
+
+  Future<void> reactivarCliente(int id) async {
+    try{
+      await clienteRepo.reactivarCliente(id);
+      await cargarClientes();
+    } catch(e) {
+      print("❌ Error al reactivar cliente: $e");
+    }
   }
 
   // Future<ClienteModel?> consultarPorNombreYApellidos(String query) async {
