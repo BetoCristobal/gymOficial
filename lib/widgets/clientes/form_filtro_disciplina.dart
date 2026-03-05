@@ -106,14 +106,19 @@ class _FormFiltroDisciplinaState extends State<FormFiltroDisciplina> {
                       final clienteRepo = ClienteRepository();
 
                       if (_selectedDisciplina == null) {
-                        // Si selecciona "Todas", muestra todos los clientes
+                        // Si selecciona "Todas", muestra solo los clientes activos
                         clienteProvider.filtrarClientesPorIds(
-                          clienteProvider.clientes.map((c) => c.id!).toList()
+                          clienteProvider.clientes.where((c) => c.activo == 1).map((c) => c.id!).toList()
                         );
                       } else {
                         // Obtiene los ids de clientes inscritos en la disciplina seleccionada
                         final idsClientes = await clienteRepo.getClientesPorDisciplina(int.parse(_selectedDisciplina!));
-                        clienteProvider.filtrarClientesPorIds(idsClientes);
+                        // Solo los activos
+                        final idsActivos = clienteProvider.clientes
+                          .where((c) => c.activo == 1 && idsClientes.contains(c.id))
+                          .map((c) => c.id!)
+                          .toList();
+                        clienteProvider.filtrarClientesPorIds(idsActivos);
                       }
 
                       Navigator.pop(context);
