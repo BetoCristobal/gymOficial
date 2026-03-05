@@ -72,7 +72,11 @@ class _AlertDialogWhatsAppContentState extends State<_AlertDialogWhatsAppContent
     setState(() {
       seleccionado = idx;
       if (idx != null) {
-        mensajeController.text = mensajes[idx].mensaje;
+        final raw = mensajes[idx].mensaje;
+        final texto = raw.contains('{proximo_pago}')
+            ? raw.replaceAll('{proximo_pago}', _formatearFecha(widget.proximoPago))
+            : raw;
+        mensajeController.text = texto;
       }
     });
   }
@@ -96,6 +100,32 @@ class _AlertDialogWhatsAppContentState extends State<_AlertDialogWhatsAppContent
               minLines: 3,
               maxLines: 8,
               decoration: InputDecoration(labelText: 'Mensaje'),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton.icon(
+                icon: Icon(Icons.date_range, color: Colors.white),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 90, 99, 224),
+                  foregroundColor: Colors.white,
+                  textStyle: TextStyle(fontWeight: FontWeight.bold),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+                onPressed: () {
+                  const variable = '{proximo_pago}';
+                  final text = mensajeEditController.text;
+                  final selection = mensajeEditController.selection;
+                  final newText = text.replaceRange(
+                    selection.start >= 0 ? selection.start : text.length,
+                    selection.end >= 0 ? selection.end : text.length,
+                    variable,
+                  );
+                  mensajeEditController.text = newText;
+                  mensajeEditController.selection = TextSelection.collapsed(offset: (selection.start >= 0 ? selection.start : text.length) + variable.length);
+                },
+                label: Text('Agregar variable proximo pago'),
+              ),
             ),
           ],
         ),
@@ -255,34 +285,7 @@ class _AlertDialogWhatsAppContentState extends State<_AlertDialogWhatsAppContent
               ),
             ),
             SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: ElevatedButton.icon(
-                icon: Icon(Icons.date_range, color: Colors.white),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green[700],
-                  foregroundColor: Colors.white,
-                  textStyle: TextStyle(fontWeight: FontWeight.bold),
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                ),
-                onPressed: _isCursorActive
-                    ? () {
-                        final fecha = _formatearFecha(widget.proximoPago);
-                        final text = mensajeController.text;
-                        final selection = mensajeController.selection;
-                        final newText = text.replaceRange(
-                          selection.start,
-                          selection.end,
-                          fecha,
-                        );
-                        mensajeController.text = newText;
-                        mensajeController.selection = TextSelection.collapsed(offset: selection.start + fecha.length);
-                        _updateState();
-                      }
-                    : null,
-                label: Text('Agregar fecha próximo pago'),
-              ),
-            ),
+            // Botón de agregar variable fecha eliminado de aquí
             Container(
               padding: EdgeInsets.only(top: 10.0),
               width: double.infinity,
@@ -290,7 +293,11 @@ class _AlertDialogWhatsAppContentState extends State<_AlertDialogWhatsAppContent
                 icon: Icon(FontAwesomeIcons.paperPlane, color: Colors.green[900]),
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.green[200]),
                 onPressed: () {
-                  enviarWhatsapp(widget.telefono, mensajeController.text);
+                  final texto = mensajeController.text.replaceAll(
+                    '{proximo_pago}',
+                    _formatearFecha(widget.proximoPago),
+                  );
+                  enviarWhatsapp(widget.telefono, texto);
                 },
                 label: Text("Enviar", style: TextStyle(color: Colors.green[900])),
               ),

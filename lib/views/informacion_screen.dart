@@ -118,8 +118,13 @@ class _InformacionScreenState extends State<InformacionScreen> {
                                   //---------------------------------------------------------BOTON WHATSAPP
                                   IconButton(
                                     onPressed: () {
-                                      alertDialogWhatsApp(context, widget.ultimoPago.proximaFechaPago, cliente.telefono);
-                                    }, 
+                                      final pagoProvider = Provider.of<PagoProvider>(context, listen: false);
+                                      DateTime proximaFecha = widget.ultimoPago.proximaFechaPago;
+                                      if (pagoProvider.pagosPorCliente.isNotEmpty) {
+                                        proximaFecha = pagoProvider.pagosPorCliente.first.proximaFechaPago;
+                                      }
+                                      alertDialogWhatsApp(context, proximaFecha, cliente.telefono);
+                                    },
                                     icon: Icon(FontAwesomeIcons.whatsapp, color: Colors.green[900]),
                                     style: ButtonStyle(
                                       backgroundColor: WidgetStateProperty.all<Color>(Colors.green[200]!),
